@@ -87,25 +87,25 @@
   /* A / B BUTTONS */
   #ab {
     position: absolute;
-    right: 7%; top: 8%;
-    width: 128px; height: 92px;
+    right: 5%; top: 6%;
+    width: 138px; height: 100px;
     transform: rotate(-20deg);
   }
   .rbtn {
     position: absolute;
-    width: 48px; height: 48px;
+    width: 58px; height: 58px;
     border-radius: 50%;
     background: #9b2c6f;
     border: none;
     box-shadow: 0 4px 0 #5e1a44;
-    color: #ffd9ee; font-size: 17px; font-weight: bold;
+    color: #ffd9ee; font-size: 20px; font-weight: bold;
   }
   .rbtn:active, .rbtn.pressed { background:#7a2257; box-shadow: 0 1px 0 #5e1a44; transform: translateY(3px); }
-  #btn-a { right: 0;  top: 6px; }
-  #btn-b { right: 56px; top: 38px; }
+  #btn-a { right: 0;  top: 4px; }
+  #btn-b { right: 62px; top: 40px; }
   .rlabel { position:absolute; color:#6b5b8a; font-size:10px; font-weight:bold; }
-  #lbl-a { right: 16px; top: 56px; }
-  #lbl-b { right: 72px; top: 88px; }
+  #lbl-a { right: 20px; top: 64px; }
+  #lbl-b { right: 82px; top: 100px; }
   /* START / SELECT */
   #startsel {
     position: absolute;
@@ -853,30 +853,26 @@
   const STORY = {
     intro: [
       "Sei un giovane pescatore di Napoli.",
-      "Sogni di diventare il migliore del",
-      "mondo e di collezionare ogni pesce",
-      "dei sette mari.",
+      "Sogni di diventare il migliore del mondo e di collezionare ogni pesce dei sette mari.",
       "",
       "Il tuo viaggio comincia dal Golfo..."
     ],
     // short arrival note shown when a new location is unlocked
     arrive: {
-      lofoten:   "Una lettera dal Nord ti invita ai\nfreddi Fiordi di Lofoten!",
-      bijagos:   "Le maree selvagge delle Bijagos\nti aspettano in Africa!",
-      antille:   "Rotta verso i Caraibi e i suoi\nrelitti d'altura!",
-      amazzonia: "Il Rio delle Amazzoni ti chiama\nnel cuore della giungla!",
-      australia: "La Grande Barriera Corallina\nbrilla all'orizzonte!",
-      fuji:      "Sotto il Monte Fuji, il Giappone\nti accoglie!",
-      kamchatka: "Le baie vulcaniche della Kamchatka:\nfredde ed estreme!",
-      patagonia: "Ai confini del mondo, la Patagonia\ne i suoi ghiacciai!",
-      ross:      "L'ultima sfida: il gelido\nMare di Ross, in Antartide!"
+      lofoten:   "Una lettera dal Nord ti invita ai freddi Fiordi di Lofoten!",
+      bijagos:   "Le maree selvagge delle Bijagos ti aspettano in Africa!",
+      antille:   "Rotta verso i Caraibi e i suoi relitti d'altura!",
+      amazzonia: "Il Rio delle Amazzoni ti chiama nel cuore della giungla!",
+      australia: "La Grande Barriera Corallina brilla all'orizzonte!",
+      fuji:      "Sotto il Monte Fuji, il Giappone ti accoglie!",
+      kamchatka: "Le baie vulcaniche della Kamchatka: fredde ed estreme!",
+      patagonia: "Ai confini del mondo, la Patagonia e i suoi ghiacciai!",
+      ross:      "L'ultima sfida: il gelido Mare di Ross, in Antartide!"
     },
     finale: [
-      "Hai domato anche il Mare di Ross,",
-      "il piu' estremo dei mari.",
+      "Hai domato anche il Mare di Ross, il piu' estremo dei mari.",
       "",
-      "Da giovane pescatore di Napoli",
-      "sei diventato una LEGGENDA!",
+      "Da giovane pescatore di Napoli sei diventato una LEGGENDA!",
       "",
       "Grazie per aver giocato!"
     ]
@@ -1125,7 +1121,23 @@
   // Show a narrative screen with the given lines; call `after` when dismissed.
   function showStory(title, lines, after) {
     storyTitle = title;
-    storyLines = lines;
+    // word-wrap the paragraphs to fit the parchment panel width
+    const maxChars = 26;   // chars per line that fit the panel at 8px monospace
+    const wrapped = [];
+    lines.forEach(para => {
+      if (para === "") { wrapped.push(""); return; }
+      let cur = "";
+      para.split(" ").forEach(word => {
+        if ((cur + (cur?" ":"") + word).length > maxChars) {
+          if (cur) wrapped.push(cur);
+          cur = word;
+        } else {
+          cur = cur ? cur + " " + word : word;
+        }
+      });
+      if (cur) wrapped.push(cur);
+    });
+    storyLines = wrapped;
     storyAfter = after || null;
     storyReveal = 0;
     screen = "story";
@@ -1133,38 +1145,35 @@
   }
   function updateStory() {
     const total = storyLines.join("\n").length;
-    // fast-forward typewriter or dismiss
     if (consumePress("a") || consumePress("b") || consumePress("start")) {
-      if (storyReveal < total) { storyReveal = total; }   // reveal all first
+      if (storyReveal < total) { storyReveal = total; }
       else {
         const cb = storyAfter; storyAfter = null;
         blockAUntilRelease = true;
         if (cb) cb(); else { screen = "game"; }
       }
     } else {
-      storyReveal = Math.min(total, storyReveal + 1.2);   // typewriter speed
+      storyReveal = Math.min(total, storyReveal + 1.2);
     }
   }
   function drawStory() {
-    // parchment-on-wood look
     drawWoodPanel(0, 0, W, H);
     const px = 10, py = 14, pw = W-20, ph = H-28;
     ctx.fillStyle = "#f4ecd0"; ctx.fillRect(px, py, pw, ph);
     ctx.strokeStyle = "#5a3a1a"; ctx.lineWidth = 2; ctx.strokeRect(px+1, py+1, pw-2, ph-2);
     if (storyTitle) { text(storyTitle, px+6, py+5, "#8a2c2c"); }
-    // typewriter reveal across the joined text
+    // typewriter reveal across the wrapped lines
     let shown = Math.floor(storyReveal);
     let y = py + 20;
     for (let i = 0; i < storyLines.length; i++) {
       const line = storyLines[i];
-      if (shown <= 0 && line.length) { break; }
+      if (shown <= 0 && line.length) break;
       const part = line.slice(0, Math.max(0, shown));
       text(part, px+8, y, "#3a2a1a");
-      shown -= line.length + 1; // +1 for the newline
-      y += 11;
+      shown -= line.length + 1;
+      y += 10;
     }
-    // blinking prompt
-    if (Math.floor(frame/20)%2===0) { ctx.textAlign="center"; text("\u25B6 PREMI B", W/2, H-12, "#8a2c2c"); ctx.textAlign="left"; }
+    if (Math.floor(frame/20)%2===0) { ctx.textAlign="center"; text("\u25B6 PREMI B", W/2, H-11, "#8a2c2c"); ctx.textAlign="left"; }
   }
 
   function cycleAvatar(row, delta) {
@@ -1704,7 +1713,7 @@
             saveGame();
             // narrative arrival note (then it stays on the map)
             if (STORY.arrive[key]) {
-              const lines = STORY.arrive[key].split("\n");
+              const lines = [ STORY.arrive[key] ];
               showStory("NUOVA META", lines, () => { screen = "map"; mapMsg=""; });
             } else {
               mapMsg = "Biglietto pagato! Zona sbloccata.";
