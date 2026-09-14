@@ -214,7 +214,93 @@
       win:    () => seq([[523,0.10],[659,0.10],[784,0.10],[1047,0.18]], "square", 0.16),
       lose:   () => seq([[392,0.12],[311,0.12],[247,0.22]], "sawtooth", 0.16),
       coin:   () => seq([[988,0.06],[1319,0.12]], "square", 0.15),
-      vibrate:(pattern) => { try { if (navigator.vibrate) navigator.vibrate(pattern); } catch(e){} }
+      vibrate:(pattern) => { try { if (navigator.vibrate) navigator.vibrate(pattern); } catch(e){} },
+
+      // ----- background music (two tracks, low volume, looping) -----
+      _musicOn: false,
+      _musicTimer: null,
+      _track: "shanty",
+      musicPlaying: function(){ return this._musicOn; },
+      currentTrack: function(){ return this._track; },
+      _tracks: (function(){
+        const N = { G3:196, A3:220, B3:247, C4:262, D4:294, E4:330, F4:349, G4:392, A4:440, B4:494, C5:523, D5:587, R:0 };
+        return {
+          // slow, gentle sea shanty (title / menus)
+          shanty: {
+            beat: 0.30, vol: 0.028, wave: "square", bassWave: "triangle",
+            mel: [
+              [N.D4,2],[N.G4,2],[N.A4,1],[N.G4,1],
+              [N.F4,2],[N.E4,2],[N.D4,2],[N.R,1],[N.D4,1],
+              [N.B4,2],[N.A4,1],[N.G4,1],[N.A4,2],[N.C5,2],
+              [N.B4,2],[N.G4,2],[N.A4,2],[N.R,1],[N.A4,1],
+              [N.G4,4]
+            ],
+            bass: [N.G3,N.D4,N.C4,N.G3]
+          },
+          // calmer, slower ambient tune while fishing
+          fishing: {
+            beat: 0.42, vol: 0.022, wave: "triangle", bassWave: "triangle",
+            mel: [
+              [N.G4,3],[N.E4,1],[N.D4,4],
+              [N.E4,3],[N.G4,1],[N.A4,4],
+              [N.C5,2],[N.B4,2],[N.A4,2],[N.G4,2],
+              [N.E4,4],[N.D4,4]
+            ],
+            bass: [N.C4,N.C4,N.G3,N.G3]
+          }
+        };
+      })(),
+      startMusic: function (track) {
+        const a = ctxAudio(); if (!a) return;
+        if (track && track !== this._track) { this._track = track; this.stopMusic(); }
+        if (this._musicOn) return;
+        this._musicOn = true;
+        const T = this._tracks[this._track];
+        const beat = T.beat, vol = T.vol;
+        let mi = 0, bi = 0;
+        const self = this;
+        function scheduleChunk() {
+          if (!self._musicOn) return;
+          const now = a.currentTime;
+          let t = now, scheduled = 0;
+          while (scheduled < 2.5) {
+            const [f, beats] = T.mel[mi];
+            const dur = beats * beat;
+            if (f) {
+              const o = a.createOscillator(), g = a.createGain();
+              o.type = T.wave; o.frequency.setValueAtTime(f, t);
+              g.gain.setValueAtTime(0.0001, t);
+              g.gain.exponentialRampToValueAtTime(vol, t + 0.03);
+              g.gain.exponentialRampToValueAtTime(0.0001, t + dur*0.92);
+              o.connect(g); g.connect(a.destination); o.start(t); o.stop(t + dur);
+            }
+            const bf = T.bass[bi % T.bass.length];
+            const ob = a.createOscillator(), gb = a.createGain();
+            ob.type = T.bassWave; ob.frequency.setValueAtTime(bf/2, t);
+            gb.gain.setValueAtTime(0.0001, t);
+            gb.gain.exponentialRampToValueAtTime(vol*0.8, t + 0.03);
+            gb.gain.exponentialRampToValueAtTime(0.0001, t + dur*0.8);
+            ob.connect(gb); gb.connect(a.destination); ob.start(t); ob.stop(t + dur);
+            t += dur; scheduled += dur;
+            mi = (mi + 1) % T.mel.length; bi++;
+          }
+          self._musicTimer = setTimeout(scheduleChunk, (t - now) * 1000 - 150);
+        }
+        scheduleChunk();
+      },
+      stopMusic: function () {
+        this._musicOn = false;
+        if (this._musicTimer) { clearTimeout(this._musicTimer); this._musicTimer = null; }
+      },
+      // switch to a given track (restart only if it actually changed)
+      setTrack: function (track) {
+        if (track === this._track && this._musicOn) return;
+        const wasOn = this._musicOn;
+        this.stopMusic();
+        this._track = track;
+        if (wasOn) this.startMusic(track);
+      },
+      toggleMusic: function () { if (this._musicOn) this.stopMusic(); else this.startMusic(); }
     };
   })();
 
@@ -328,8 +414,20 @@
   // Top-level screen: "title" -> "map" -> "game"
   let screen = "title";
   let mapIndex = 0;   // selected location on the world map
+  let mapMsg = "";    // feedback line on the map (locked / ticket / etc.)
+  let musicEnabled = true;   // background music toggle
   let titleIndex = 0;         // 0=Continua, 1=Nuova partita
   let titleConfirmNew = false; // confirm overwrite dialog
+  let creatorRow = 0;          // selected option row in the character creator
+  let creatorToMap = false;    // if true, finishing the creator goes to the map (new game)
+  let nameEditing = false;     // editing the name field
+  let creatorZone = 0;         // 0 = attributes (top), 1 = stamp board (bottom)
+  let stampIndex = 0;          // selected stamp on the board
+  // narrative screen
+  let storyLines = [];         // array of text lines to show
+  let storyAfter = null;       // callback when story is dismissed
+  let storyTitle = "";
+  let storyReveal = 0;         // typewriter progress
 
   // Bite/timing tuning
   let biteTimer = 0;       // counts up during BITE window
@@ -337,6 +435,8 @@
   let nibblePreDelay = 0;  // small "teasing" nibble jiggle before the real bite
   let resultTimer = 0;     // how long HOOKED/LOST message stays before returning
   let lostReason = "";     // why the fish was lost (shown on LOST screen)
+  let awardPopup = null;   // {rank,timer,name} shown briefly when a new medal is earned
+  let storyPending = null; // "finale" etc. — a story to show after the catch scene
 
   // ---------- PROGRESSION / ECONOMY ----------
   let coins = 0;           // player coins
@@ -668,7 +768,7 @@
   // consumable: se true, si consuma 1 per lancio; permanente altrimenti.
   const BAITS = {
     verme:   { name:"Verme",        weights:[0.60,0.25,0.12,0.03], consumable:false, cost:0,  color:"#c88a6a" },
-    fondo:   { name:"Esca da fondo",weights:[0.15,0.45,0.32,0.08], consumable:true,  cost:15, color:"#8a7a5a" },
+    fondo:   { name:"Esca Profumata",weights:[0.15,0.45,0.32,0.08], consumable:true,  cost:15, color:"#8a7a5a" },
     viva:    { name:"Esca viva",    weights:[0.05,0.12,0.08,0.75], consumable:true,  cost:60, color:"#d0605a" }
   };
 
@@ -712,6 +812,203 @@
   })();
 
   let currentLocation = "napoli";
+
+  // ---------- PROGRESSION: location order, tickets, unlocking ----------
+  const LOCATION_ORDER = [
+    "napoli","lofoten","bijagos","antille","amazzonia",
+    "australia","fuji","kamchatka","patagonia","ross"
+  ];
+  // ticket price to reach each location the first time (index matches LOCATION_ORDER)
+  // Napoli is free; then 50, 100, 150, ... (+50 each step)
+  const TICKET_PRICE = LOCATION_ORDER.map((_, i) => i === 0 ? 0 : i * 50);
+
+  // set of unlocked location keys; Napoli always unlocked
+  const unlocked = { napoli: true };
+  // highest award rank already celebrated per location (to avoid repeat popups)
+  const awardsSeen = {};
+
+  // How many distinct species caught in a location for a given tier
+  function tierCaughtCount(locKey, tier) {
+    const loc = LOCATIONS[locKey];
+    return loc.fish[tier].filter(sp => caught[locKey + ":" + sp.name]).length;
+  }
+
+  // Requirement met to unlock the NEXT location: F1>=3, F2>=2, F3>=2 in this location
+  function unlockReqMet(locKey) {
+    return tierCaughtCount(locKey,1) >= 3 &&
+           tierCaughtCount(locKey,2) >= 2 &&
+           tierCaughtCount(locKey,3) >= 2;
+  }
+
+  function nextLocationKey(locKey) {
+    const i = LOCATION_ORDER.indexOf(locKey);
+    return (i >= 0 && i < LOCATION_ORDER.length - 1) ? LOCATION_ORDER[i+1] : null;
+  }
+  function ticketPriceFor(locKey) {
+    const i = LOCATION_ORDER.indexOf(locKey);
+    return i >= 0 ? TICKET_PRICE[i] : 0;
+  }
+
+  // ---------- NARRATIVE ----------
+  const STORY = {
+    intro: [
+      "Sei un giovane pescatore di Napoli.",
+      "Sogni di diventare il migliore del",
+      "mondo e di collezionare ogni pesce",
+      "dei sette mari.",
+      "",
+      "Il tuo viaggio comincia dal Golfo..."
+    ],
+    // short arrival note shown when a new location is unlocked
+    arrive: {
+      lofoten:   "Una lettera dal Nord ti invita ai\nfreddi Fiordi di Lofoten!",
+      bijagos:   "Le maree selvagge delle Bijagos\nti aspettano in Africa!",
+      antille:   "Rotta verso i Caraibi e i suoi\nrelitti d'altura!",
+      amazzonia: "Il Rio delle Amazzoni ti chiama\nnel cuore della giungla!",
+      australia: "La Grande Barriera Corallina\nbrilla all'orizzonte!",
+      fuji:      "Sotto il Monte Fuji, il Giappone\nti accoglie!",
+      kamchatka: "Le baie vulcaniche della Kamchatka:\nfredde ed estreme!",
+      patagonia: "Ai confini del mondo, la Patagonia\ne i suoi ghiacciai!",
+      ross:      "L'ultima sfida: il gelido\nMare di Ross, in Antartide!"
+    },
+    finale: [
+      "Hai domato anche il Mare di Ross,",
+      "il piu' estremo dei mari.",
+      "",
+      "Da giovane pescatore di Napoli",
+      "sei diventato una LEGGENDA!",
+      "",
+      "Grazie per aver giocato!"
+    ]
+  };
+
+  // A locked location can be bought if it's the immediate next after an unlocked
+  // location whose unlock requirements are met.
+  function mapPurchasable(locKey) {
+    if (unlocked[locKey]) return false;
+    const i = LOCATION_ORDER.indexOf(locKey);
+    if (i <= 0) return false;
+    const prev = LOCATION_ORDER[i-1];
+    return unlocked[prev] && unlockReqMet(prev);
+  }
+
+  // ---------- AWARDS (fishing hooks) per location ----------
+  // returns 0 = none, 1 = bronze, 2 = silver, 3 = gold
+  function tierComplete(locKey, tier) {
+    const loc = LOCATIONS[locKey];
+    return loc.fish[tier].every(sp => caught[locKey + ":" + sp.name]);
+  }
+  function tierAny(locKey, tier) {
+    const loc = LOCATIONS[locKey];
+    return loc.fish[tier].some(sp => caught[locKey + ":" + sp.name]);
+  }
+  function locationAward(locKey) {
+    const base = tierComplete(locKey,1) && tierComplete(locKey,2) && tierComplete(locKey,3);
+    if (!base) return 0;
+    if (tierComplete(locKey,4)) return 3;   // gold: everything
+    if (tierAny(locKey,4))      return 2;   // silver: base + at least 1 tier-4
+    return 1;                               // bronze: base only
+  }
+  const AWARD_INFO = {
+    1: { name:"Amo di Bronzo", color:"#c87a3a", ring:"#8a5024" },
+    2: { name:"Amo d'Argento", color:"#c8ccd4", ring:"#8f96a0" },
+    3: { name:"Amo d'Oro",     color:"#e8c040", ring:"#a88a20" }
+  };
+
+  // Count medals across all locations: {bronze, silver, gold}
+  function awardTotals() {
+    let b=0,s=0,g=0;
+    LOCATION_ORDER.forEach(k => {
+      const r = locationAward(k);
+      if (r===1) b++; else if (r===2) s++; else if (r===3) g++;
+    });
+    return { bronze:b, silver:s, gold:g, total:b+s+g };
+  }
+  // Fisherman title based on gold medals earned
+  function playerTitle() {
+    const g = awardTotals().gold;
+    if (g >= 10) return "Leggenda del Mare";
+    if (g >= 6)  return "Maestro Pescatore";
+    if (g >= 3)  return "Pescatore Esperto";
+    if (g >= 1)  return "Pescatore";
+    return "Novizio";
+  }
+  // draw a fishing-hook medal of the given rank (0 = empty/locked slot)
+  function drawHookMedal(cx, cy, s, rank) {
+    // medal disc
+    if (rank === 0) {
+      ctx.fillStyle = "#2a3340"; ctx.beginPath(); ctx.arc(cx, cy, 6*s, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = "#3f4a58"; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(cx, cy, 6*s, 0, Math.PI*2); ctx.stroke();
+      ctx.fillStyle = "#4a5464"; text("?", cx-2, cy-3, "#4a5464");
+      return;
+    }
+    const inf = AWARD_INFO[rank];
+    ctx.fillStyle = inf.ring; ctx.beginPath(); ctx.arc(cx, cy, 6.5*s, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = inf.color; ctx.beginPath(); ctx.arc(cx, cy, 5*s, 0, Math.PI*2); ctx.fill();
+    // fish hook shape inside
+    ctx.strokeStyle = inf.ring; ctx.lineWidth = Math.max(1, s);
+    ctx.beginPath();
+    ctx.moveTo(cx, cy-3*s);
+    ctx.lineTo(cx, cy+1.5*s);
+    ctx.arc(cx-1.5*s, cy+1.5*s, 1.5*s, 0, Math.PI); // hook curve
+    ctx.stroke();
+    // barb + eyelet
+    ctx.fillStyle = inf.ring; ctx.fillRect(cx-3.5*s, cy+1.5*s, 1*s, 1*s);
+    ctx.fillRect(cx-0.5*s, cy-4*s, 1*s, 1*s);
+  }
+
+  // Rough wooden plank background across a rectangle
+  function drawWoodPanel(x, y, w, h) {
+    ctx.fillStyle = "#6a4a2a"; ctx.fillRect(x, y, w, h);
+    // horizontal planks
+    const plankH = 12;
+    for (let py = y; py < y+h; py += plankH) {
+      ctx.fillStyle = ((py/plankH)|0)%2 ? "#664628" : "#6e4e2c";
+      ctx.fillRect(x, py, w, plankH-1);
+      // plank gap
+      ctx.fillStyle = "#3f2c16"; ctx.fillRect(x, py+plankH-1, w, 1);
+      // wood grain streaks
+      ctx.fillStyle = "rgba(90,60,30,0.5)";
+      for (let gx = x + ((py*7)%9); gx < x+w; gx += 22) ctx.fillRect(gx, py+3, 10, 1);
+      // a couple of nails
+      ctx.fillStyle = "#3a2a1a"; ctx.fillRect(x+4, py+4, 1, 1); ctx.fillRect(x+w-6, py+4, 1, 1);
+    }
+  }
+
+  // A postage-stamp of a location: mini preview + perforated border + 3 mini medals
+  function drawStamp(key, x, y, w, h, selected) {
+    const isUnlocked = !!unlocked[key];
+    // perforated white border (stamp look)
+    ctx.fillStyle = selected ? "#fff6d0" : "#f0ece0";
+    ctx.fillRect(x-2, y-2, w+4, h+4);
+    // perforations
+    ctx.fillStyle = "#6a4a2a";
+    for (let px2 = x-2; px2 < x+w+2; px2 += 4) { ctx.fillRect(px2, y-3, 2, 2); ctx.fillRect(px2, y+h+1, 2, 2); }
+    for (let py2 = y-2; py2 < y+h+2; py2 += 4) { ctx.fillRect(x-3, py2, 2, 2); ctx.fillRect(x+w+1, py2, 2, 2); }
+    // image
+    ctx.save();
+    ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
+    if (isUnlocked) {
+      drawLocationPreview(key, x, y, w, h);
+    } else {
+      ctx.fillStyle = "#3a3f46"; ctx.fillRect(x, y, w, h);
+      // lock icon
+      const lx = x+w/2, ly = y+h/2;
+      ctx.fillStyle = "#8a8f98"; ctx.fillRect(lx-2, ly-1, 4, 4);
+      ctx.strokeStyle = "#8a8f98"; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(lx, ly-1, 1.5, Math.PI, 0); ctx.stroke();
+    }
+    ctx.restore();
+    // border highlight if selected
+    ctx.strokeStyle = selected ? "#ffe14d" : "#5a3a1a";
+    ctx.lineWidth = 1; ctx.strokeRect(x+0.5, y+0.5, w-1, h-1);
+    // 3 mini medals along the bottom of the stamp
+    if (isUnlocked) {
+      const award = locationAward(key);
+      [1,2,3].forEach((rank,i)=>{
+        drawHookMedal(x + 5 + i*7, y + h - 3, 0.5, award >= rank ? rank : 0);
+      });
+    }
+  }
 
   // Pick a fish: roll tier using the EQUIPPED BAIT's weight table, then a species.
   function pickFish() {
@@ -758,7 +1055,10 @@
         baitStock,
         equippedBait,
         caught,
-        currentLocation
+        currentLocation,
+        avatar,
+        unlocked,
+        awardsSeen
       };
       localStorage.setItem(SAVE_KEY, JSON.stringify(data));
       return true;
@@ -784,6 +1084,12 @@
       Object.assign(caught, d.caught || {});
       equippedBait = d.equippedBait || "verme";
       currentLocation = d.currentLocation || "napoli";
+      if (d.avatar) Object.assign(avatar, d.avatar);
+      Object.keys(unlocked).forEach(k => { if (k !== "napoli") delete unlocked[k]; });
+      if (d.unlocked) Object.assign(unlocked, d.unlocked);
+      unlocked.napoli = true;
+      Object.keys(awardsSeen).forEach(k => delete awardsSeen[k]);
+      if (d.awardsSeen) Object.assign(awardsSeen, d.awardsSeen);
       return true;
     } catch (e) { return false; }
   }
@@ -797,7 +1103,241 @@
     Object.keys(caught).forEach(k => delete caught[k]);
     equippedBait = "verme";
     currentLocation = "napoli";
+    Object.keys(unlocked).forEach(k => delete unlocked[k]);
+    unlocked.napoli = true;
+    Object.keys(awardsSeen).forEach(k => delete awardsSeen[k]);
     saveGame();
+  }
+
+  // ---------- CHARACTER CREATOR ----------
+  // rows: 0 Nome, 1 Pelle, 2 Capelli, 3 Barba, 4 Cappello, 5 Maglia, 6 Pantaloni, 7 Conferma
+  const CREATOR_ROWS = ["Nome","Pelle","Capelli","Barba","Cappello","Maglia","Pantaloni","CONFERMA"];
+
+  function openCreator(toMap) {
+    screen = "creator";
+    creatorRow = 0;
+    creatorZone = 0;
+    stampIndex = Math.max(0, locationList().indexOf(currentLocation));
+    creatorToMap = !!toMap;
+    blockAUntilRelease = true;
+  }
+
+  // Show a narrative screen with the given lines; call `after` when dismissed.
+  function showStory(title, lines, after) {
+    storyTitle = title;
+    storyLines = lines;
+    storyAfter = after || null;
+    storyReveal = 0;
+    screen = "story";
+    blockAUntilRelease = true;
+  }
+  function updateStory() {
+    const total = storyLines.join("\n").length;
+    // fast-forward typewriter or dismiss
+    if (consumePress("a") || consumePress("b") || consumePress("start")) {
+      if (storyReveal < total) { storyReveal = total; }   // reveal all first
+      else {
+        const cb = storyAfter; storyAfter = null;
+        blockAUntilRelease = true;
+        if (cb) cb(); else { screen = "game"; }
+      }
+    } else {
+      storyReveal = Math.min(total, storyReveal + 1.2);   // typewriter speed
+    }
+  }
+  function drawStory() {
+    // parchment-on-wood look
+    drawWoodPanel(0, 0, W, H);
+    const px = 10, py = 14, pw = W-20, ph = H-28;
+    ctx.fillStyle = "#f4ecd0"; ctx.fillRect(px, py, pw, ph);
+    ctx.strokeStyle = "#5a3a1a"; ctx.lineWidth = 2; ctx.strokeRect(px+1, py+1, pw-2, ph-2);
+    if (storyTitle) { text(storyTitle, px+6, py+5, "#8a2c2c"); }
+    // typewriter reveal across the joined text
+    let shown = Math.floor(storyReveal);
+    let y = py + 20;
+    for (let i = 0; i < storyLines.length; i++) {
+      const line = storyLines[i];
+      if (shown <= 0 && line.length) { break; }
+      const part = line.slice(0, Math.max(0, shown));
+      text(part, px+8, y, "#3a2a1a");
+      shown -= line.length + 1; // +1 for the newline
+      y += 11;
+    }
+    // blinking prompt
+    if (Math.floor(frame/20)%2===0) { ctx.textAlign="center"; text("\u25B6 PREMI B", W/2, H-12, "#8a2c2c"); ctx.textAlign="left"; }
+  }
+
+  function cycleAvatar(row, delta) {
+    const wrap = (v, n) => (v + delta + n) % n;
+    switch (row) {
+      case 1: avatar.skin  = wrap(avatar.skin,  AV.skin.length);  break;
+      case 2: avatar.hair  = wrap(avatar.hair,  AV.hair.length);  break;
+      case 3: avatar.beard = wrap(avatar.beard, 2);               break; // 0/1
+      case 4: avatar.hat   = wrap(avatar.hat,   AV.hat.length);   break;
+      case 5: avatar.shirt = wrap(avatar.shirt, AV.shirt.length); break;
+      case 6: avatar.pants = wrap(avatar.pants, AV.pants.length); break;
+    }
+  }
+
+  function updateCreator() {
+    const attrRows = CREATOR_ROWS.length; // includes CONFERMA
+    if (creatorZone === 0) {
+      // ----- top: attributes -----
+      if (consumePress("up")) {
+        if (creatorRow === 0) { creatorZone = 1; }   // wrap up into board
+        else { creatorRow--; SFX.up(); }
+      }
+      if (consumePress("down")) {
+        if (creatorRow === attrRows - 1) { creatorZone = 1; creatorRow = 0; } // into board
+        else { creatorRow++; SFX.down(); }
+      }
+      if (consumePress("left"))  { cycleAvatar(creatorRow, -1); SFX.left(); }
+      if (consumePress("right")) { cycleAvatar(creatorRow, +1); SFX.right(); }
+      if (consumePress("b")) {
+        if (creatorRow === 0) {
+          const nm = window.prompt("Nome del pescatore:", avatar.name);
+          if (nm !== null) { avatar.name = (nm.trim().slice(0,12) || "PESCATORE").toUpperCase(); }
+        } else if (creatorRow === attrRows - 1) {
+          SFX.start(); saveGame();
+          if (creatorToMap) {
+            // new game: show the intro story, then go to the map
+            showStory("PROLOGO", STORY.intro, () => { screen = "map"; mapIndex = 0; });
+          } else { screen = "game"; }
+          blockAUntilRelease = true;
+        } else { cycleAvatar(creatorRow, +1); }
+      }
+    } else {
+      // ----- bottom: stamp board -----
+      const list = locationList(), n = list.length, cols = 5;
+      if (consumePress("left"))  { stampIndex = (stampIndex - 1 + n) % n; SFX.left(); }
+      if (consumePress("right")) { stampIndex = (stampIndex + 1) % n; SFX.right(); }
+      if (consumePress("up"))    { if (stampIndex < cols) { creatorZone = 0; creatorRow = attrRows-1; } else { stampIndex -= cols; SFX.up(); } }
+      if (consumePress("down"))  { if (stampIndex + cols < n) { stampIndex += cols; SFX.down(); } else { creatorZone = 0; creatorRow = 0; } }
+      if (consumePress("b")) {
+        const key = list[stampIndex];
+        if (unlocked[key]) { SFX.start(); saveGame(); currentLocation = key; resetCast(); screen = "game"; blockAUntilRelease = true; }
+      }
+    }
+    // A: back / confirm-exit
+    if (consumePress("a")) {
+      SFX.b(); saveGame();
+      if (creatorToMap) { screen = "title"; titleIndex = 0; }
+      else { screen = "game"; }
+      blockAUntilRelease = true;
+    }
+  }
+
+  // Fisherman avatar seen from the FRONT (shows face + beard)
+  function drawAvatarFront(cx, cy, s) {
+    const skin = AV.skin[avatar.skin], hair = AV.hair[avatar.hair];
+    const shirt = AV.shirt[avatar.shirt], pants = AV.pants[avatar.pants], hat = AV.hat[avatar.hat];
+    ctx.fillStyle = pants; ctx.fillRect(cx-6*s, cy+8*s, 12*s, 10*s);
+    ctx.fillStyle = shade(pants,-0.35); ctx.fillRect(cx-1*s, cy+8*s, 2*s, 10*s);
+    ctx.fillStyle = shirt; ctx.fillRect(cx-8*s, cy-6*s, 16*s, 15*s);
+    ctx.fillStyle = shade(shirt,-0.2); ctx.fillRect(cx-8*s, cy-6*s, 16*s, 3*s);
+    ctx.fillStyle = shirt; ctx.fillRect(cx-11*s, cy-5*s, 3*s, 11*s); ctx.fillRect(cx+8*s, cy-5*s, 3*s, 11*s);
+    ctx.fillStyle = skin;  ctx.fillRect(cx-11*s, cy+5*s, 3*s, 2*s);  ctx.fillRect(cx+8*s, cy+5*s, 3*s, 2*s);
+    ctx.fillStyle = skin; ctx.fillRect(cx-5*s, cy-18*s, 10*s, 12*s);
+    if (avatar.beard) {
+      ctx.fillStyle = hair;
+      ctx.fillRect(cx-5*s, cy-10*s, 10*s, 5*s);
+      ctx.fillRect(cx-4*s, cy-6*s, 8*s, 2*s);
+      ctx.fillRect(cx-6*s, cy-11*s, 2*s, 4*s); ctx.fillRect(cx+4*s, cy-11*s, 2*s, 4*s);
+    }
+    ctx.fillStyle = "#000"; ctx.fillRect(cx-3*s, cy-14*s, 1.4*s, 1.4*s); ctx.fillRect(cx+1.6*s, cy-14*s, 1.4*s, 1.4*s);
+    ctx.fillStyle = shade(skin,-0.15); ctx.fillRect(cx-0.5*s, cy-13*s, 1*s, 2*s);
+    ctx.fillStyle = hair;
+    ctx.fillRect(cx-6*s, cy-20*s, 12*s, 4*s);
+    ctx.fillRect(cx-6*s, cy-18*s, 2*s, 5*s); ctx.fillRect(cx+4*s, cy-18*s, 2*s, 5*s);
+    if (hat) {
+      ctx.fillStyle = hat; ctx.fillRect(cx-7*s, cy-22*s, 14*s, 4*s);
+      ctx.fillStyle = shade(hat,-0.2); ctx.fillRect(cx-7*s, cy-19*s, 14*s, 1*s);
+      ctx.fillStyle = hat; ctx.fillRect(cx-8*s, cy-19*s, 16*s, 2*s);
+    }
+  }
+
+  function drawCreator() {
+    // rough wood background (whole hut)
+    drawWoodPanel(0, 0, W, H);
+    // title sign
+    ctx.fillStyle = "#3f2c16"; ctx.fillRect(0,0,W,12);
+    text("CAPANNA DEL PESCATORE", 4, 2, "#e8d0a0");
+
+    const topFocus = (creatorZone === 0);
+
+    // ===== TOP HALF: identity + attributes =====
+    const topY = 14, topH = 62;
+    // avatar plaque
+    ctx.fillStyle = "#4a3418"; ctx.fillRect(6, topY, 44, topH-4);
+    ctx.strokeStyle = "#2a1c0c"; ctx.strokeRect(6.5, topY+0.5, 43, topH-5);
+    // avatar contained within the plaque (feet stay above the divider)
+    drawAvatarFront(28, topY + 40, 1.4);
+
+    // name + rank on ONE line (rank removed from a separate row)
+    text(avatar.name, 54, topY, "#f4e4c0");
+    text(playerTitle(), 54, topY+9, "#e8c060");
+
+    const rows = ["Pelle","Capelli","Barba","Cappello","Maglia","Pantaloni","CONFERMA"];
+    const valueOf = (row) => {
+      switch(row){
+        case 1: return "col " + (avatar.skin+1);
+        case 2: return ["Nero","Castano","Bion.sc","Biondo","Grigio","Rosso"][avatar.hair];
+        case 3: return AV.beardName[avatar.beard];
+        case 4: return AV.hatName[avatar.hat];
+        case 5: return "tin " + (avatar.shirt+1);
+        case 6: return "tin " + (avatar.pants+1);
+        default: return "";
+      }
+    };
+    // Name row
+    {
+      const iy = topY + 19, sel = topFocus && creatorRow === 0;
+      if (sel) { ctx.fillStyle = "#c8a860"; ctx.fillRect(53, iy-1, W-58, 9); }
+      text("Nome (B)", 54, iy, sel ? "#2a1c0c" : "#e8d0a0");
+    }
+    // two-column compact attributes (tighter, starts higher)
+    for (let r = 1; r <= 6; r++) {
+      const col = (r-1) % 2, rr = ((r-1)/2)|0;
+      const bx = 54 + col*52, iy = topY + 28 + rr*8;
+      const sel = topFocus && creatorRow === r;
+      if (sel) { ctx.fillStyle = "#c8a860"; ctx.fillRect(bx-1, iy-1, 51, 8); }
+      const cc = sel ? "#2a1c0c" : "#e8d0a0";
+      text(rows[r-1].slice(0,4)+":"+valueOf(r), bx, iy, cc);
+    }
+    // CONFERMA button (below the attribute rows, no overlap)
+    {
+      const sel = topFocus && creatorRow === 7;
+      const bx = 54, iy = topY + 52;
+      if (sel) { ctx.fillStyle = "#3fae5a"; ctx.fillRect(bx-1, iy-1, W-60, 9); }
+      text("\u2713 CONFERMA", bx, iy, sel ? "#0f2a1a" : "#8ad07a");
+    }
+
+    // divider (a wooden beam)
+    ctx.fillStyle = "#3f2c16"; ctx.fillRect(0, topY+topH, W, 3);
+
+    // ===== BOTTOM HALF: stamp board =====
+    const boardY = topY + topH + 4;
+    text("BACHECA", 6, boardY, "#e8d0a0");
+    // totals (more room now)
+    const tot = awardTotals();
+    text("Oro " + tot.gold + "  Arg " + tot.silver + "  Bro " + tot.bronze, W-100, boardY, "#f4e4c0");
+
+    // stamps grid (5 cols)
+    const list = locationList();
+    const cols = 5, sw = 24, sh = 18, gapX = 4, gapY = 6;
+    const gridX = 8, gridY = boardY + 10;
+    list.forEach((k, i) => {
+      const c = i % cols, r = (i / cols) | 0;
+      const sx = gridX + c * (sw + gapX);
+      const sy = gridY + r * (sh + gapY);
+      drawStamp(k, sx, sy, sw, sh, (creatorZone===1 && i===stampIndex));
+    });
+    // selected stamp caption ONLY (placed low, below the stamps)
+    if (creatorZone === 1) {
+      const sel = LOCATIONS[list[stampIndex]];
+      const label = unlocked[list[stampIndex]] ? sel.name + "  (B = VAI)" : sel.name + " — bloccata";
+      ctx.textAlign = "center"; text(label, W/2, H-9, "#f4e4c0"); ctx.textAlign = "left";
+    }
   }
 
   // ---------- FIGHT (combattimento) ----------
@@ -861,6 +1401,27 @@
 
   // player stands on the dock, near bottom center, seen from the back
   const player = { x: W/2, y: 132 };
+
+  // ---------- FISHERMAN AVATAR ----------
+  // customizable appearance; saved with the game
+  const avatar = {
+    name: "PESCATORE",
+    skin: 1,    // index into AV.skin
+    hair: 2,    // index into AV.hair color
+    beard: 1,   // 0 = none, else index into AV.hair color (same palette as hair)
+    hat: 1,     // index into AV.hat
+    shirt: 0,   // index into AV.shirt
+    pants: 0    // index into AV.pants
+  };
+  const AV = {
+    skin:  ["#f2c090","#e0a878","#c88858","#9a6a40","#f7d9b0"],
+    hair:  ["#2a1a10","#5a3a1a","#8a5a2a","#c8a030","#d8d8d8","#c04030"], // nero, castano, biondo scuro, biondo, grigio, rosso
+    hat:   [null, "#c23b3b", "#3a6a9a", "#2e6a3a", "#e0c040", "#e8e8e8"], // nessuno, rosso, blu, verde, giallo, bianco(lana)
+    hatName:["Nessuno","Berretto rosso","Berretto blu","Verde","Giallo","Lana"],
+    shirt: ["#d84545","#3a6a9a","#2e8b57","#e0a030","#8a5ad0","#e8e8e8","#2a2a30"],
+    pants: ["#3a4a8a","#5a3a1a","#3a3a44","#556b2f","#7a2a2a"],
+    beardName:["Rasato","Barba"]
+  };
   const rodTip = { x: W/2 + 10, y: 96 };   // rod tip out in front of player
 
   // aiming: horizontal position across the water + distance via power
@@ -880,8 +1441,8 @@
   // paused == null when playing; otherwise an object describing the open menu
   let paused = null;
   const MENUS = {
-    START: { title: "PAUSA", items: ["Riprendi", "Esci al menu"] },
-    SELECT:{ title: "MENU",  items: ["Acquario", "Collezione", "Inventario", "Negozio", "Cambia zona", "Riprendi"] }
+    START: { title: "PAUSA", items: ["Riprendi", "Musica", "Esci al menu"] },
+    SELECT:{ title: "MENU",  items: ["Acquario", "Collezione", "Inventario", "Negozio", "Capanna", "Cambia zona", "Riprendi"] }
   };
   let menuIndex = 0;
   let menuMsg = "";       // transient feedback line shown under the menu
@@ -917,7 +1478,7 @@
   // Shop catalog: consumable baits for sale
   function shopList() { return ["fondo", "viva"]; }
   // Ordered list of location keys
-  function locationList() { return Object.keys(LOCATIONS); }
+  function locationList() { return LOCATION_ORDER.filter(k => LOCATIONS[k]); }
 
   // Ordered list of bait keys shown in the inventory
   function baitList() { return ["verme", "fondo", "viva"]; }
@@ -1039,6 +1600,8 @@
       if (choice === "Collezione") { collectionOpen = true; collRow = 0; collCol = 0; collScroll = 0; menuMsg=""; return; }
       if (choice === "Negozio") { shopOpen = true; shopIndex = 0; menuMsg=""; return; }
       if (choice === "Cambia zona") { closeMenu(); screen = "map"; mapIndex = locationList().indexOf(currentLocation); blockAUntilRelease = true; return; }
+      if (choice === "Capanna") { closeMenu(); openCreator(false); return; }
+      if (choice === "Musica") { musicEnabled = !musicEnabled; if (musicEnabled) SFX.startMusic("shanty"); else SFX.stopMusic(); menuMsg = "Musica: " + (musicEnabled?"ON":"OFF"); return; }
       if (choice === "Esci al menu") {
         saveGame();
         closeMenu();
@@ -1057,20 +1620,26 @@
     // Clear the A latch once the button is physically released
     if (blockAUntilRelease && !keys.a) blockAUntilRelease = false;
 
+    // Pick the music track by context (only if music is enabled & playing)
+    if (musicEnabled && SFX.musicPlaying()) {
+      const wanted = (screen === "game" && !paused) ? "fishing" : "shanty";
+      if (SFX.currentTrack() !== wanted) SFX.setTrack(wanted);
+    }
+
     // ----- TITLE SCREEN -----
     if (screen === "title") {
       SFX.unlock();
+      if (!SFX.musicPlaying() && musicEnabled) SFX.startMusic("shanty");
       const canContinue = hasSave();
 
       // confirmation dialog for New Game overwrite
       if (titleConfirmNew) {
         if (consumePress("b")) {
-          // wipe progress and start fresh
+          // wipe progress and start fresh, then create the fisherman
           resetProgress();
           titleConfirmNew = false;
           SFX.start();
-          screen = "map";
-          mapIndex = 0;
+          openCreator(true);
         } else if (consumePress("a")) {
           titleConfirmNew = false;
         }
@@ -1092,11 +1661,17 @@
           if (mapIndex < 0) mapIndex = 0;
         } else {
           if (canContinue) { titleConfirmNew = true; }   // ask before overwriting
-          else { resetProgress(); SFX.start(); screen = "map"; mapIndex = 0; }
+          else { resetProgress(); SFX.start(); openCreator(true); }
         }
       }
       return;
     }
+
+    // ----- CHARACTER CREATOR -----
+    if (screen === "creator") { updateCreator(); return; }
+
+    // ----- STORY / NARRATIVE -----
+    if (screen === "story") { updateStory(); return; }
 
     // ----- WORLD MAP -----
     if (screen === "map") {
@@ -1104,17 +1679,42 @@
       const cols = 2;
       const n = list.length;
       // free movement with wrap around the grid
-      if (consumePress("left"))  { mapIndex = (mapIndex - 1 + n) % n; SFX.left(); }
-      if (consumePress("right")) { mapIndex = (mapIndex + 1) % n; SFX.right(); }
-      if (consumePress("up"))    { mapIndex = (mapIndex - cols + n) % n; SFX.up(); }
-      if (consumePress("down"))  { mapIndex = (mapIndex + cols) % n; SFX.down(); }
+      if (consumePress("left"))  { mapIndex = (mapIndex - 1 + n) % n; mapMsg=""; SFX.left(); }
+      if (consumePress("right")) { mapIndex = (mapIndex + 1) % n; mapMsg=""; SFX.right(); }
+      if (consumePress("up"))    { mapIndex = (mapIndex - cols + n) % n; mapMsg=""; SFX.up(); }
+      if (consumePress("down"))  { mapIndex = (mapIndex + cols) % n; mapMsg=""; SFX.down(); }
       if (consumePress("b") || consumePress("a")) {
-        currentLocation = list[mapIndex];
-        saveGame();
-        resetCast();
-        screen = "game";
-        blockAUntilRelease = true;   // don't let this A also start a cast
-        SFX.start();
+        const key = list[mapIndex];
+        if (unlocked[key]) {
+          // already unlocked -> travel there
+          mapMsg = "";
+          currentLocation = key;
+          saveGame();
+          resetCast();
+          screen = "game";
+          blockAUntilRelease = true;
+          SFX.start();
+        } else if (mapPurchasable(key)) {
+          // requirements met -> buy the ticket to unlock
+          const price = ticketPriceFor(key);
+          if (coins >= price) {
+            coins -= price;
+            unlocked[key] = true;
+            SFX.coin(); SFX.win();
+            saveGame();
+            // narrative arrival note (then it stays on the map)
+            if (STORY.arrive[key]) {
+              const lines = STORY.arrive[key].split("\n");
+              showStory("NUOVA META", lines, () => { screen = "map"; mapMsg=""; });
+            } else {
+              mapMsg = "Biglietto pagato! Zona sbloccata.";
+            }
+          } else {
+            mapMsg = "Ti servono " + price + " monete!";
+          }
+        } else {
+          mapMsg = "Zona bloccata: completa la tappa precedente.";
+        }
       }
       return;
     }
@@ -1200,7 +1800,16 @@
     else if (state === STATE.HOOKED) {
       resultTimer += dt;
       // Scena "pesce preso": canna verticale con pesce. Dura RESULT_DURATION.
-      if (resultTimer > RESULT_DURATION) { landedFish = null; resetCast(); }
+      if (resultTimer > RESULT_DURATION) {
+        landedFish = null;
+        if (storyPending === "finale") {
+          storyPending = null;
+          resetCast();
+          showStory("EPILOGO", STORY.finale, () => { screen = "game"; });
+        } else {
+          resetCast();
+        }
+      }
     }
     else if (state === STATE.LOST) {
       resultTimer += dt;
@@ -1410,6 +2019,15 @@
     if (fish.size > caught[key].best) caught[key].best = fish.size;
     SFX.win(); SFX.coin();
     SFX.vibrate([60, 30, 60, 30, 120]);   // catch celebration buzz
+    // check for a newly earned award medal in this location
+    const rank = locationAward(currentLocation);
+    const seen = awardsSeen[currentLocation] || 0;
+    if (rank > seen) {
+      awardsSeen[currentLocation] = rank;
+      awardPopup = { rank: rank, timer: 0, name: AWARD_INFO[rank].name };
+      // FINALE: gold hook at the Ross Sea completes the journey
+      if (currentLocation === "ross" && rank === 3) storyPending = "finale";
+    }
     saveGame();   // autosave dopo ogni cattura
     state = STATE.HOOKED;
     resultTimer = 0;
@@ -1434,6 +2052,8 @@
     frame++;
 
     if (screen === "title") { drawTitle(); return; }
+    if (screen === "creator") { drawCreator(); return; }
+    if (screen === "story") { drawStory(); return; }
     if (screen === "map")   { drawPostcards(); return; }
 
     const bg = LOCATIONS[currentLocation].background;
@@ -1633,7 +2253,6 @@
     // ---- UI per stato ----
     if (state === STATE.AIM) {
       drawAimTarget();
-      textBox("MIRA <  >", 6, 6);
       textBox("A = LANCIA", 6, 130);
       drawBaitHUD();
     }
@@ -1786,6 +2405,19 @@
 
   // Draws a fish OR a crab depending on the species flags
   function drawCreature(sp, cx, cy, scale, dir, vertical) {
+    if (vertical) {
+      // rotate the whole sprite -90deg so any horizontal creature hangs head-up
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(-Math.PI/2);
+      drawCreatureH(sp, 0, 0, scale, dir || 1);
+      ctx.restore();
+      return;
+    }
+    drawCreatureH(sp, cx, cy, scale, dir, vertical);
+  }
+
+  function drawCreatureH(sp, cx, cy, scale, dir, vertical) {
     if (sp && sp.crab) return drawCrabSprite(cx, cy, scale, sp.color, sp.fin);
     if (sp && sp.squid) return drawSquidSprite(cx, cy, scale, sp.color, sp.fin, dir);
     if (sp && sp.orca) return drawOrcaSprite(cx, cy, scale, dir);
@@ -2407,7 +3039,7 @@
     const qty = (equippedBait === "verme") ? "\u221E" : String(baitStock[equippedBait] || 0);
     const label = b.name + " x" + qty;
     const w = label.length * 5 + 14;
-    const x = 4, y = 18;
+    const x = 4, y = 4;
     ctx.fillStyle = PAL.textBg; ctx.fillRect(x, y, w, 11);
     ctx.strokeStyle = PAL.dark; ctx.strokeRect(x+0.5, y+0.5, w-1, 10);
     ctx.fillStyle = b.color; ctx.fillRect(x+3, y+3, 5, 5);
@@ -2418,17 +3050,19 @@
   function drawCatchScene() {
     const x = player.x, y = player.y;
     // body (back)
-    ctx.fillStyle = PAL.pants; ctx.fillRect(x-6, y-2, 12, 10);
-    ctx.fillStyle = PAL.dockDark; ctx.fillRect(x-1, y-2, 2, 10);
-    ctx.fillStyle = PAL.shirt; ctx.fillRect(x-8, y-16, 16, 15);
-    ctx.fillStyle = "#b53838"; ctx.fillRect(x-8, y-16, 16, 3);
-    // head + cap
-    ctx.fillStyle = PAL.skin; ctx.fillRect(x-4, y-24, 8, 8);
-    ctx.fillStyle = PAL.hair; ctx.fillRect(x-5, y-25, 10, 4);
-    ctx.fillStyle = "#c23b3b"; ctx.fillRect(x-5, y-27, 10, 3);
+    const askin = AV.skin[avatar.skin], ahair = AV.hair[avatar.hair];
+    const ashirt = AV.shirt[avatar.shirt], apants = AV.pants[avatar.pants], ahat = AV.hat[avatar.hat];
+    ctx.fillStyle = apants; ctx.fillRect(x-6, y-2, 12, 10);
+    ctx.fillStyle = shade(apants,-0.35); ctx.fillRect(x-1, y-2, 2, 10);
+    ctx.fillStyle = ashirt; ctx.fillRect(x-8, y-16, 16, 15);
+    ctx.fillStyle = shade(ashirt,-0.2); ctx.fillRect(x-8, y-16, 16, 3);
+    // head + hair + hat
+    ctx.fillStyle = askin; ctx.fillRect(x-4, y-24, 8, 8);
+    ctx.fillStyle = ahair; ctx.fillRect(x-5, y-25, 10, 4);
+    if (ahat) { ctx.fillStyle = ahat; ctx.fillRect(x-5, y-27, 10, 3); }
     // both arms raised holding the rod up
-    ctx.fillStyle = PAL.shirt; ctx.fillRect(x-9, y-24, 3, 12);
-    ctx.fillStyle = PAL.shirt; ctx.fillRect(x+6, y-24, 3, 12);
+    ctx.fillStyle = ashirt; ctx.fillRect(x-9, y-24, 3, 12);
+    ctx.fillStyle = ashirt; ctx.fillRect(x+6, y-24, 3, 12);
     // vertical rod going up out of frame
     ctx.strokeStyle = PAL.rod; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(x, y-24); ctx.lineTo(x+2, 30); ctx.stroke();
@@ -2440,8 +3074,9 @@
     const cf = landedFish || { color:"#5aa0d8", fin:"#3f7fb8", size:1, name:"Pesce" };
     const fscale = (2.0 + (cf.size ? (cf.size - 1) * 0.8 : 0)) * (cf.tierScale || 1);
     const sp = cf.species;
-    if (sp && (sp.crab || sp.squid || sp.orca || sp.krill || sp.seal || sp.shape)) {
-      drawCreature(sp, lineX + wig, 74, fscale, 1);
+    if (sp && (sp.crab || sp.squid || sp.orca || sp.krill || sp.seal || sp.shape || sp.ghost)) {
+      // hang the creature vertically (head up) from the line
+      drawCreature(sp, lineX + wig, 70, fscale, 1, true);
     } else {
       // regular fish hangs head-up on the line
       drawFishSprite(lineX + wig, 76, fscale, cf.color, cf.fin, 1, true);
@@ -2451,6 +3086,19 @@
     drawBanner((cf.name || "PRESO") + "!", "#2e7d32", 108);
     textBox("+" + lastReward + " MONETE", 6, 6);
     drawCoinsHUD();
+
+    // new-award popup (medal + name)
+    if (awardPopup) {
+      const inf = AWARD_INFO[awardPopup.rank];
+      const bw = 128, bh = 26, bx = (W-bw)/2, by = 30;
+      ctx.fillStyle = "rgba(15,30,20,0.85)"; ctx.fillRect(bx, by, bw, bh);
+      ctx.strokeStyle = inf.color; ctx.lineWidth = 1; ctx.strokeRect(bx+0.5, by+0.5, bw-1, bh-1);
+      drawHookMedal(bx + 14, by + 13, 1.1, awardPopup.rank);
+      text("NUOVO PREMIO!", bx + 28, by + 4, "#ffe14d");
+      text(awardPopup.name, bx + 28, by + 14, inf.color);
+      awardPopup.timer += 1;
+      if (awardPopup.timer > 130) awardPopup = null;   // ~ shown for the scene
+    }
   }
 
   // Scene: little fish jumps and swims away toward the horizon
@@ -2707,6 +3355,12 @@
     ctx.fillStyle = "#173f7a"; ctx.fillRect(px, py, pw, ph);
     ctx.fillStyle = PAL.dark; ctx.fillRect(px, py, pw, 12);
     text(loc.name + "  " + got + "/" + total, px + 4, py + 2, PAL.textBg);
+    // award medals for THIS location (top-right): bronze, silver, gold slots
+    const award = locationAward(currentLocation);
+    [1,2,3].forEach((rank, i) => {
+      const mx = px + pw - 44 + i*15, my = py + 6;
+      drawHookMedal(mx, my, 0.85, award >= rank ? rank : 0);
+    });
 
     // scrollable content area (below the title bar)
     const viewTop = py + 13, viewBot = py + ph - 1, viewH = viewBot - viewTop;
@@ -2977,6 +3631,20 @@
       ctx.fillStyle = "rgba(15,56,15,0.7)"; ctx.fillRect(cx+cardW-22, cy, 22, 8);
       text(got+"/"+species.length, cx+cardW-20, cy, "#ffffff");
       if (k === currentLocation) { ctx.fillStyle="rgba(15,56,15,0.7)"; ctx.fillRect(cx,cy,10,8); text("\u2691", cx+2, cy, "#8ad0a0"); }
+
+      // LOCK overlay if not unlocked
+      if (!unlocked[k]) {
+        const buyable = mapPurchasable(k);
+        ctx.fillStyle = "rgba(10,15,25,0.6)"; ctx.fillRect(cx, cy, cardW, cardH);
+        // padlock icon
+        const lx = cx + cardW/2, ly = cy + cardH/2;
+        ctx.fillStyle = buyable ? "#ffe14d" : "#c8ccd4";
+        ctx.fillRect(lx-4, ly-1, 8, 7);           // body
+        ctx.strokeStyle = buyable ? "#ffe14d" : "#c8ccd4"; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(lx, ly-1, 3, Math.PI, 0); ctx.stroke();   // shackle
+        ctx.fillStyle = "#3a2a1a"; ctx.fillRect(lx-1, ly+1, 2, 3);         // keyhole
+        if (buyable) text("$"+ticketPriceFor(k), lx-8, ly+8, "#ffe14d");
+      }
     });
     ctx.restore();
 
@@ -2984,15 +3652,29 @@
     if (scroll > 1) text("\u25B2", W-10, viewTop+1, "#ffffff");
     if (scroll < contentH - viewH - 1) text("\u25BC", W-10, viewBot-9, "#ffffff");
 
-    // fixed info bar at the bottom with room for name + sea
-    const sel = LOCATIONS[list[mapIndex]];
-    const nm = sel.name;
+    // fixed info bar at the bottom
+    const selKey = list[mapIndex];
+    const sel = LOCATIONS[selKey];
     const barH = 20, barY = H - barH - 2, bx = 6, bw = W - 12;
     ctx.fillStyle = "#f4ecd0"; ctx.fillRect(bx, barY, bw, barH);
     ctx.strokeStyle = "#5a3a1a"; ctx.lineWidth = 1; ctx.strokeRect(bx+0.5, barY+0.5, bw-1, barH-1);
     ctx.textAlign = "center";
-    text(nm, W/2, barY + 3, "#3a2a1a");
-    text(sel.sea, W/2, barY + 12, "#6a5a3a");
+    if (mapMsg) {
+      text(sel.name, W/2, barY + 2, "#3a2a1a");
+      text(mapMsg, W/2, barY + 11, "#8a2c2c");
+    } else if (unlocked[selKey]) {
+      text(sel.name + "  \u2691", W/2, barY + 2, "#3a2a1a");
+      text(sel.sea + "   A/B = VAI", W/2, barY + 11, "#6a5a3a");
+    } else if (mapPurchasable(selKey)) {
+      text(sel.name + "  \uD83D\uDD13", W/2, barY + 2, "#2e6a2c");
+      text("Biglietto $" + ticketPriceFor(selKey) + "  A/B = SBLOCCA", W/2, barY + 11, "#2e6a2c");
+    } else {
+      // show what's missing in the previous location
+      const i = LOCATION_ORDER.indexOf(selKey);
+      const prev = i>0 ? LOCATION_ORDER[i-1] : null;
+      text(sel.name + "  (BLOCCATA)", W/2, barY + 2, "#8a2c2c");
+      if (prev) text("Completa " + LOCATIONS[prev].name + ": F1 3, F2 2, F3 2", W/2, barY + 11, "#8a2c2c");
+    }
     ctx.textAlign = "left";
   }
 
@@ -4268,21 +4950,36 @@
   function drawPlayer() {
     // Fisherman seen from BEHIND, standing at bottom center
     const x = player.x, y = player.y;
+    const skin = AV.skin[avatar.skin], hair = AV.hair[avatar.hair];
+    const shirt = AV.shirt[avatar.shirt], pants = AV.pants[avatar.pants];
+    const hat = AV.hat[avatar.hat];
+    const shirtDark = shade(shirt, -0.2);
     // legs / pants
-    ctx.fillStyle = PAL.pants; ctx.fillRect(x-6, y-2, 12, 10);
-    ctx.fillStyle = PAL.dockDark; ctx.fillRect(x-1, y-2, 2, 10); // leg split
+    ctx.fillStyle = pants; ctx.fillRect(x-6, y-2, 12, 10);
+    ctx.fillStyle = shade(pants,-0.35); ctx.fillRect(x-1, y-2, 2, 10); // leg split
     // torso (back of shirt)
-    ctx.fillStyle = PAL.shirt; ctx.fillRect(x-8, y-16, 16, 15);
+    ctx.fillStyle = shirt; ctx.fillRect(x-8, y-16, 16, 15);
     // shoulders shading
-    ctx.fillStyle = "#b53838"; ctx.fillRect(x-8, y-16, 16, 3);
-    // arms along the body / one raised holding rod
-    ctx.fillStyle = PAL.skin; ctx.fillRect(x+6, y-14, 4, 4);   // right hand/arm out
-    ctx.fillStyle = PAL.shirt; ctx.fillRect(x-10, y-14, 3, 10); // left arm
-    ctx.fillStyle = PAL.shirt; ctx.fillRect(x+7, y-14, 3, 8);  // right arm
-    // head (back) + hair + cap
-    ctx.fillStyle = PAL.skin; ctx.fillRect(x-4, y-24, 8, 8);
-    ctx.fillStyle = PAL.hair; ctx.fillRect(x-5, y-25, 10, 4);
-    ctx.fillStyle = "#c23b3b"; ctx.fillRect(x-5, y-27, 10, 3); // cap
+    ctx.fillStyle = shirtDark; ctx.fillRect(x-8, y-16, 16, 3);
+    // arms
+    ctx.fillStyle = skin;  ctx.fillRect(x+6, y-14, 4, 4);   // right hand/arm out
+    ctx.fillStyle = shirt; ctx.fillRect(x-10, y-14, 3, 10); // left arm
+    ctx.fillStyle = shirt; ctx.fillRect(x+7, y-14, 3, 8);   // right arm
+    // head (back) + hair
+    ctx.fillStyle = skin; ctx.fillRect(x-4, y-24, 8, 8);
+    ctx.fillStyle = hair; ctx.fillRect(x-5, y-25, 10, 4);
+    ctx.fillStyle = hair; ctx.fillRect(x-5, y-22, 2, 4); ctx.fillRect(x+3, y-22, 2, 4); // side hair
+    // hat (if any)
+    if (hat) { ctx.fillStyle = hat; ctx.fillRect(x-5, y-27, 10, 3); ctx.fillStyle = shade(hat,-0.2); ctx.fillRect(x-5, y-25, 10, 1); }
+  }
+
+  // lighten/darken a hex color by amt (-1..1)
+  function shade(hex, amt) {
+    if (!hex) return hex;
+    let r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    const f = (c)=> Math.max(0, Math.min(255, Math.round(c + 255*amt)));
+    r=f(r); g=f(g); b=f(b);
+    return "#" + [r,g,b].map(c=>c.toString(16).padStart(2,"0")).join("");
   }
 
   function drawRodAndLine() {
