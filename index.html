@@ -3535,13 +3535,24 @@
       text("N", cx-2, cy-18, "#f4ecd0");
     })();
 
-    // decorative sea serpent (bottom-right, like old charts)
+    // anchor decoration (top-left)
     (function(){
-      const x=104, y=126;
-      ctx.fillStyle="rgba(60,110,90,0.85)";
-      for (let i=0;i<4;i++){ const hx=x+i*7 + Math.sin(frame*0.05+i)*1; ctx.beginPath(); ctx.arc(hx,y,3,Math.PI,0); ctx.fill(); }
-      ctx.fillRect(x+26,y-4,5,4);
-      ctx.fillStyle="#e0402a"; ctx.fillRect(x+30,y-3,1,1);
+      const x=16, y=22;
+      ctx.strokeStyle="#f4ecd0"; ctx.fillStyle="#f4ecd0"; ctx.lineWidth=2;
+      // ring
+      ctx.beginPath(); ctx.arc(x, y-6, 2.5, 0, Math.PI*2); ctx.stroke();
+      // shank
+      ctx.beginPath(); ctx.moveTo(x, y-4); ctx.lineTo(x, y+6); ctx.stroke();
+      // stock (cross bar)
+      ctx.beginPath(); ctx.moveTo(x-4, y-1); ctx.lineTo(x+4, y-1); ctx.stroke();
+      // arms / flukes
+      ctx.beginPath();
+      ctx.moveTo(x, y+6); ctx.quadraticCurveTo(x-6, y+5, x-6, y+1);
+      ctx.moveTo(x, y+6); ctx.quadraticCurveTo(x+6, y+5, x+6, y+1);
+      ctx.stroke();
+      // fluke tips
+      ctx.fillRect(x-7, y-1, 2, 2); ctx.fillRect(x+5, y-1, 2, 2);
+      ctx.lineWidth = 1;
     })();
 
     // title text
