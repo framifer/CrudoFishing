@@ -1911,8 +1911,10 @@
     if (inSafe) {
       f.outTimer = 0;
       if (reeling) {
-        f.catchProg += 0.16 * dt;
-        f.stamina  -= 0.20 * dt;
+        // reel faster as the fish tires (stamina low) -> the bar reflects real closeness
+        const reelSpeed = 0.14 + (1 - f.stamina) * 0.16;   // ~0.14 fresh .. ~0.30 exhausted
+        f.catchProg += reelSpeed * dt;
+        f.stamina  -= 0.22 * dt;
       }
     } else {
       f.outTimer += dt;
@@ -1928,14 +1930,14 @@
     // reset the "perfect catch" slip flag once safely back in the zone
     if (inSafe && f.slipPenalized) f.slipPenalized = false;
 
-    // 4) Fish tires as stamina drops
+    // 4) Fish tires as stamina drops (affects reel speed, NOT an instant win)
     f.stamina = Math.max(0, f.stamina);
     if (f.stamina < 0.4) f.tired = true;
 
     f.catchProg = Math.min(1, f.catchProg);
 
-    // 5) Win
-    if (f.catchProg >= 1 || f.stamina <= 0) { landFish(); return; }
+    // 5) Win ONLY when the fish is fully reeled to the dock (bar full)
+    if (f.catchProg >= 1) { landFish(); return; }
 
     // keep the bobber pulled toward the dock as catch progresses
     hook.x = hook.tx + (rodTip.x - hook.tx) * f.catchProg;
