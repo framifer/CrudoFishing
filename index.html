@@ -172,7 +172,7 @@
       music_on:"Musica: ON", music_off:"Musica: OFF",
       // select menu
       menu:"MENU", aquarium:"Acquario", collection:"Collezione", inventory:"Inventario",
-      shop:"Negozio", hut:"Capanna", change_zone:"Cambia zona",
+      shop:"Negozio", hut:"Capanna", change_zone:"Cambia zona", town:"Citta'",
       // gameplay HUD
       cast:"A = LANCIA", charging:"CARICA...", waiting:"IN ATTESA...", reel:"B = RITIRA",
       reeling:"RITIRO...", bite:"ABBOCCA!", strike:"B = STRATTONE!",
@@ -209,7 +209,8 @@
       baitVerme:"Verme", baitFondo:"Esca Profumata", baitViva:"Esca viva",
       // language screen
       choose_lang:"SCEGLI LA LINGUA", lang_it:"Italiano", lang_en:"English",
-      zone_ready:"NUOVA ZONA DISPONIBILE!", zone_ready_sub:"Vai alla mappa (SELECT)"
+      zone_ready:"NUOVA ZONA DISPONIBILE!", zone_ready_sub:"Vai alla mappa (SELECT)",
+      back_town:"A = TORNA IN CITTA'"
     },
     en: {
       press_start:"PRESS START", continue:"CONTINUE", new_game:"NEW GAME",
@@ -218,7 +219,7 @@
       pause:"PAUSE", resume:"Resume", music:"Music", exit_menu:"Exit to menu",
       music_on:"Music: ON", music_off:"Music: OFF",
       menu:"MENU", aquarium:"Aquarium", collection:"Collection", inventory:"Inventory",
-      shop:"Shop", hut:"Hut", change_zone:"Change zone",
+      shop:"Shop", hut:"Hut", change_zone:"Change zone", town:"Town",
       cast:"A = CAST", charging:"CHARGING...", waiting:"WAITING...", reel:"B = REEL IN",
       reeling:"REELING...", bite:"BITE!", strike:"B = STRIKE!",
       pull:"PULL", release:"SLACK", recovery:"REEL", tension:"TENS",
@@ -246,7 +247,8 @@
       bronze:"Bronze Hook", silver:"Silver Hook", gold:"Gold Hook",
       baitVerme:"Worm", baitFondo:"Scented Bait", baitViva:"Live Bait",
       choose_lang:"CHOOSE LANGUAGE", lang_it:"Italiano", lang_en:"English",
-      zone_ready:"NEW ZONE AVAILABLE!", zone_ready_sub:"Go to the map (SELECT)"
+      zone_ready:"NEW ZONE AVAILABLE!", zone_ready_sub:"Go to the map (SELECT)",
+      back_town:"A = BACK TO TOWN"
     }
   };
   function t(key){ return (T[lang] && T[lang][key] !== undefined) ? T[lang][key] : (T.it[key] || key); }
@@ -255,7 +257,7 @@
     const m = {
       "PAUSA":"pause","Riprendi":"resume","Musica":"music","Esci al menu":"exit_menu",
       "MENU":"menu","Acquario":"aquarium","Collezione":"collection","Inventario":"inventory",
-      "Negozio":"shop","Capanna":"hut","Cambia zona":"change_zone"
+      "Negozio":"shop","Capanna":"hut","Cambia zona":"change_zone","Citta":"town"
     };
     return m[s] ? t(m[s]) : s;
   }
@@ -399,6 +401,8 @@
       win:    () => seq([[523,0.10],[659,0.10],[784,0.10],[1047,0.18]], "square", 0.16),
       lose:   () => seq([[392,0.12],[311,0.12],[247,0.22]], "sawtooth", 0.16),
       coin:   () => seq([[988,0.06],[1319,0.12]], "square", 0.15),
+      door:   () => seq([[523,0.07],[392,0.10]], "square", 0.16),
+      splash: () => seq([[440,0.05],[294,0.05],[196,0.12]], "sawtooth", 0.14),
       vibrate:(pattern) => { try { if (navigator.vibrate) navigator.vibrate(pattern); } catch(e){} },
 
       // ----- background music (two tracks, low volume, looping) -----
@@ -1484,7 +1488,8 @@
           if (creatorToMap) {
             // new game: show the intro story, then go to the map
             showStory(lang==="en"?"PROLOGUE":"PROLOGO", storyPack().intro, () => { screen = "map"; mapIndex = 0; });
-          } else { screen = "game"; }
+          } else if (fromTown) { fromTown = false; openTown(); }
+          else { screen = "game"; }
           blockAUntilRelease = true;
         } else { cycleAvatar(creatorRow, +1); }
       }
@@ -1504,6 +1509,7 @@
     if (consumePress("a")) {
       SFX.b(); saveGame();
       if (creatorToMap) { screen = "title"; titleIndex = 0; }
+      else if (fromTown) { fromTown = false; openTown(); }
       else { screen = "game"; }
       blockAUntilRelease = true;
     }
@@ -1724,7 +1730,7 @@
   let paused = null;
   const MENUS = {
     START: { title: "PAUSA", items: ["Riprendi", "Musica", "Esci al menu"] },
-    SELECT:{ title: "MENU",  items: ["Acquario", "Collezione", "Inventario", "Negozio", "Capanna", "Cambia zona", "Riprendi"] }
+    SELECT:{ title: "MENU",  items: ["Collezione", "Inventario", "Citta", "Riprendi"] }
   };
   let menuIndex = 0;
   let menuMsg = "";       // transient feedback line shown under the menu
@@ -1755,7 +1761,10 @@
     // clear edges so the opening press doesn't leak into the menu
     consumePress("start"); consumePress("select");
   }
-  function closeMenu() { paused = null; menuMsg = ""; aquariumOpen = false; inventoryOpen = false; collectionOpen = false; shopOpen = false; zoneOpen = false; }
+  function closeMenu() {
+    paused = null; menuMsg = ""; aquariumOpen = false; inventoryOpen = false; collectionOpen = false; shopOpen = false; zoneOpen = false;
+    if (fromTown) { fromTown = false; openTown(); }
+  }
 
   // Shop catalog: consumable baits for sale
   function shopList() { return ["fondo", "viva"]; }
@@ -1775,7 +1784,7 @@
         consumePress("up"); consumePress("down"); consumePress("left"); consumePress("right");
         return;
       }
-      if (consumePress("a")) { aquariumOpen = false; aqPointer = false; blockAUntilRelease = true; return; }
+      if (consumePress("a")) { aqPointer=false; if (fromTown) { closeMenu(); } else { aquariumOpen = false; } blockAUntilRelease = true; return; }
       if (consumePress("b")) { aqPointer = !aqPointer; if (aqPointer) aqIndex = 0; return; }
       // SELECT = svuota tutto (chiede conferma)
       if (consumePress("select")) { if (aquarium.length > 0) aqConfirmEmpty = true; return; }
@@ -1836,7 +1845,7 @@
       const list = shopList();
       if (consumePress("up"))   shopIndex = (shopIndex - 1 + list.length) % list.length;
       if (consumePress("down")) shopIndex = (shopIndex + 1) % list.length;
-      if (consumePress("a")) { shopOpen = false; blockAUntilRelease = true; return; }
+      if (consumePress("a")) { if (fromTown) { closeMenu(); } else { shopOpen = false; } blockAUntilRelease = true; return; }
       if (consumePress("b")) {
         const key = list[shopIndex];
         const price = BAITS[key].cost;
@@ -1883,6 +1892,7 @@
       if (choice === "Negozio") { shopOpen = true; shopIndex = 0; menuMsg=""; return; }
       if (choice === "Cambia zona") { closeMenu(); screen = "map"; mapIndex = locationList().indexOf(currentLocation); blockAUntilRelease = true; return; }
       if (choice === "Capanna") { closeMenu(); openCreator(false); return; }
+      if (choice === "Citta") { closeMenu(); openTown(); return; }
       if (choice === "Musica") { musicEnabled = !musicEnabled; if (musicEnabled) SFX.startMusic("shanty"); else SFX.stopMusic(); menuMsg = "Musica: " + (musicEnabled?"ON":"OFF"); return; }
       if (choice === "Esci al menu") {
         saveGame();
@@ -1958,6 +1968,9 @@
     // ----- STORY / NARRATIVE -----
     if (screen === "story") { updateStory(); return; }
 
+    // ----- TOWN / HUB -----
+    if (screen === "town") { updateTown(dt); return; }
+
     // ----- WORLD MAP -----
     if (screen === "map") {
       const list = locationList();
@@ -1971,13 +1984,11 @@
       if (consumePress("b") || consumePress("a")) {
         const key = list[mapIndex];
         if (unlocked[key]) {
-          // already unlocked -> travel there
+          // already unlocked -> travel there (enter the town hub)
           mapMsg = "";
           currentLocation = key;
           saveGame();
-          resetCast();
-          screen = "game";
-          blockAUntilRelease = true;
+          openTown();
           SFX.start();
         } else if (mapPurchasable(key)) {
           // requirements met -> buy the ticket to unlock
@@ -2142,6 +2153,566 @@
     hook.x = rodTip.x; hook.y = rodTip.y;
     hook.inWater = false; hook.flying = false;
     castPower = 0;
+  }
+
+  // ---------- TOWN / HUB (walkable, tile-based, Pokemon-GBC style) ----------
+  const TOWN_COLS = 20, TOWN_ROWS = 16, TILE = 8, TOWN_TOP = 16;
+  // Town layout. Tiles:
+  //  '='=path  '.'=square  'h'/'H'=hut roof/door  's'/'S'=shop roof/door
+  //  'N'=old fisherman  'D'=jetty plank  'E'=jetty END (fishing)  '~'=sea  'B'=palm/tree
+  const TOWN_BASE = [
+    "====================",
+    "=hhh===sss===ttt====",
+    "=hHh===sSs===tTt====",
+    "====================",
+    "==================N=",
+    "====================",
+    "====================",
+    "~~DD~~~~~~~~~~~PP~~~",
+    "~~DD~~~~~~~~~~~PP~~~",
+    "~~DD~~~~~~~~~~~QQ~~~",
+    "~~EE~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~",
+    "~~~~~~~~~~~~~~~~~~~~"
+  ];
+  function townMap(){ return TOWN_BASE; }
+  const TOWN_MAPS_OLD = {
+    napoli: [
+      "~~~~~~~MMMM~~~~~~~~~",
+      "...................f",
+      ".rrrr..rrrr..rrrr..B",
+      ".r##r..r##r..r##r...",
+      ".r#C#..r#S#..r#Sr..B",
+      "...................f",
+      "====================",
+      "====================",
+      "...................B",
+      ".rrrr..rrrr..rrrr...",
+      ".r##r..r##r..r##r..f",
+      ".r#Sr..r#Sr..r#Sr...",
+      "..........,,.......B",
+      "..........,,........",
+      "====================",
+      "===================="
+    ],
+    lofoten: [
+      "~~~~~MMMM~~~~~~~~~~~",
+      "....................",
+      ".rrr...rrr...rrr...B",
+      ".r#r...r#r...r#r....",
+      ".rCr...rSr...rSr...B",
+      "....................",
+      "====================",
+      "....................",
+      ".rrr...rrr...rrr...B",
+      ".r#r...r#r...r#r....",
+      ".rSr...rSr...rSr...B",
+      "....................",
+      "....................",
+      ",,,,,,,,,,,,,,,,,,,,",
+      "====================",
+      "===================="
+    ],
+    amazzonia: [
+      "~~~~~~~MMMM~~~~~~~~~",
+      "BB,,,,,,,,,,,,,,,,BB",
+      "B..rrrr....rrrr...BB",
+      "B..r##r....r##r....B",
+      "...r#C#....r#Sr...BB",
+      "B,,,,,,,,,,,,,,,,,,B",
+      "====================",
+      "B,,,,,,,,,,,,,,,,,,B",
+      "B..rrrr....rrrr...BB",
+      "...r##r....r##r....B",
+      "B..r#Sr....r#Sr...BB",
+      "BB,,,,,,,,,,,,,,,,,B",
+      ",,,,,,TT,,,,TT,,,,,,",
+      ",,,,,,TT,,,,TT,,,,,,",
+      "====================",
+      "B,,,,,,,,,,,,,,,,,,B"
+    ],
+    australia: [
+      "~~~~~~~MMMM~~~~~~~~~",
+      "....................",
+      ".rrrr..rrrr..rrrr..B",
+      ".r##r..r##r..r##r...",
+      ".rCr...r#Sr..r#Sr..B",
+      "....................",
+      "====================",
+      "====================",
+      "....................",
+      ".rrrr..rrrr..rrrr..B",
+      ".r##r..r##r..r##r...",
+      ".r#Sr..r#Sr..r#Sr..B",
+      "....................",
+      ",,,,,,,,,,,,,,,,,,,,",
+      "====================",
+      "===================="
+    ],
+    kamchatka: [
+      "~~~~~MMMM~~~~~~~~~~~",
+      "....................",
+      ".rrr...rrr...rrr....",
+      ".r#r...r#r...r#r....",
+      ".rCr...rSr...rSr....",
+      "....................",
+      "====================",
+      "....................",
+      "BB..rrr...rrr...rrrB",
+      "...r#r...r#r...r#r..",
+      "...rSr...rSr...rSr.B",
+      "....................",
+      "....................",
+      "====================",
+      "====================",
+      "BB,,,,,,,,,,,,,,,,BB"
+    ],
+    fuji: [
+      "~~~~~~~MMMM~~~~~~~~~",
+      "...................B",
+      ".rrrr..rrrr..rrrr...",
+      ".r##r..r##r..r##r..B",
+      ".r#C#..r#S#..r#Sr...",
+      "...................B",
+      "====================",
+      "====================",
+      "....................",
+      ".rrrr..rrrr..rrrr..B",
+      ".r##r..r##r..r##r...",
+      ".r#Sr..r#Sr..r#Sr..B",
+      "..........,,........",
+      "..........,,........",
+      "====================",
+      "===================="
+    ],
+    bijagos: [
+      "~~~~~~~MMMM~~~~~~~~~",
+      "B,,,,,,,,,,,,,,,,,,B",
+      "B..###....###...##.B",
+      "B..#C#....#S#...#S.B",
+      "B,,,,,,,,,,,,,,,,,,B",
+      "B,,,,,,,,,,,,,,,,,,B",
+      "====================",
+      "B,,,,,,,,,,,,,,,,,,B",
+      "B..###....###...##.B",
+      "B..#S#....#S#...#S.B",
+      "B,,,,,,,,,,,,,,,,,,B",
+      ",,,,,TT,,,,,,TT,,,,,",
+      ",,,,,TT,,,,,,TT,,,,,",
+      "B,,,,,,,,,,,,,,,,,,B",
+      "====================",
+      "B,,,,,,,,,,,,,,,,,,B"
+    ],
+    patagonia: [
+      "~~~~~MMMM~~~~~~~~~~~",
+      "....................",
+      ".rrr...rrr...rrr...B",
+      ".r#r...r#r...r#r....",
+      ".rCr...rSr...rSr...B",
+      "....................",
+      "====================",
+      "....................",
+      ".rrr...rrr...rrr...B",
+      ".r#r...r#r...r#r....",
+      ".rSr...rSr...rSr...B",
+      "....................",
+      "....................",
+      "====================",
+      "====================",
+      "BB,,,,,,,,,,,,,,,,BB"
+    ],
+    antille: [
+      "~~~~~~~MMMM~~~~~~~~~",
+      "B..................B",
+      "B.rrrr..rrrr..rrrr.B",
+      "..r##r..r##r..r##r..",
+      "B.r#C#..r#S#..r#Sr.B",
+      "B..................B",
+      "====================",
+      "====================",
+      "B..................B",
+      "B.rrrr..rrrr..rrrr.B",
+      "..r##r..r##r..r##r..",
+      "B.r#Sr..r#Sr..r#Sr.B",
+      "B..................B",
+      ",,,,,,,,,,,,,,,,,,,,",
+      "====================",
+      "===================="
+    ],
+    ross: [
+      "~~~~~MMMM~~~~~~~~~~~",
+      "....................",
+      ".rrr...rrr...rrr....",
+      ".r#r...r#r...r#r....",
+      ".rCr...rSr...rSr....",
+      "....................",
+      "====================",
+      "....................",
+      "...rrr...rrr...rrr..",
+      "...r#r...r#r...r#r..",
+      "...rSr...rSr...rSr..",
+      "....................",
+      "....................",
+      "====================",
+      "====================",
+      "===================="
+    ]
+  };
+  // theme colors per location key
+  const TOWN_THEME = {
+    napoli:   { water:"#3878d0", grassA:"#8bd06a", grassB:"#74bd52", street:"#7a7068", side:"#e0d6bc", roof:"#e05040", wall:"#eee6cc" },
+    lofoten:  { water:"#4a8ab0", grassA:"#cfe0e6", grassB:"#bcd2da", street:"#8892a0", side:"#e8eef0", roof:"#b03028", wall:"#e6ecec", snow:true },
+    amazzonia:{ water:"#4fb8a8", grassA:"#5aa84a", grassB:"#4a9440", street:"#7a6a4a", side:"#c8b890", roof:"#c07030", wall:"#d8c8a0" },
+    australia:{ water:"#40c0d0", grassA:"#9fd86a", grassB:"#88c854", street:"#c8b878", side:"#f0e6c0", roof:"#e0a030", wall:"#f4ecd0" },
+    kamchatka:{ water:"#5a86a0", grassA:"#a8b0a0", grassB:"#98a090", street:"#6a6f78", side:"#d6dcd8", roof:"#8a5a40", wall:"#d0ccc0", snow:true },
+    fuji:     { water:"#4f96c0", grassA:"#8bd06a", grassB:"#74bd52", street:"#8a8078", side:"#efe6d6", roof:"#c84040", wall:"#f0ece0" },
+    bijagos:  { water:"#3fb0a0", grassA:"#78b850", grassB:"#68a844", street:"#c8a870", side:"#e0c8a0", roof:"#c8a860", wall:"#a07850" },
+    patagonia:{ water:"#5690a8", grassA:"#8aa878", grassB:"#7a9868", street:"#7a828c", side:"#dfe4e6", roof:"#b06848", wall:"#e4e0d4" },
+    antille:  { water:"#5fd8d8", grassA:"#7fd0a0", grassB:"#6cc090", street:"#c8bca0", side:"#f0ecd8", roof:"#d84838", wall:"#f4f0e0" },
+    ross:     { water:"#2a4658", grassA:"#e6eef2", grassB:"#d6e2ea", street:"#9aa4b0", side:"#eef4f8", roof:"#5a708a", wall:"#e8eef2", snow:true }
+  };
+  function townTheme(){ return TOWN_THEME[currentLocation] || TOWN_THEME.napoli; }
+  function townTile(c, r){
+    const m = townMap();
+    if (r < 0 || r >= TOWN_ROWS || c < 0 || c >= TOWN_COLS) return "#";
+    return m[r][c];
+  }
+  function townWalkable(c, r){
+    const tl = townTile(c, r);
+    return tl === "=" || tl === "." || tl === "D" || tl === "E" || tl === "P";
+  }
+
+  // walking character state (grid position + smooth move + facing + anim)
+  const walker = { c: 3, r: 12, px: 0, py: 0, tc: 3, tr: 12, moving:false, dir:"down", step:0, animT:0 };
+  let townEnter = 0;      // >0 while a building-entry animation plays
+  let townEnterTarget = null; // {tx,ty,action}
+  let fromTown = false;   // if true, closing a menu/hut returns to the town hub
+  function townPixel(c, r){ return { x: c*TILE + TILE/2, y: TOWN_TOP + r*TILE + TILE/2 }; }
+
+  function openTown(){
+    walker.c = 9; walker.r = 6; walker.tc = 9; walker.tr = 6; walker.moving = false; walker.dir = "down";
+    const p = townPixel(walker.c, walker.r); walker.px = p.x; walker.py = p.y;
+    townEnter = 0;   // reset the entering-building animation
+    screen = "town";
+    blockAUntilRelease = true;
+  }
+
+  function updateTown(dt){
+    // building-entry animation in progress
+    if (townEnter > 0) {
+      townEnter -= dt;
+      // walk the character up into the door
+      if (townEnterTarget) { walker.py -= 14 * dt; }
+      if (townEnter <= 0) {
+        const act = townEnterTarget ? townEnterTarget.action : null;
+        townEnterTarget = null;
+        fromTown = true;
+        if (act === "hut") { openCreator(false); }
+        else if (act === "shop") { resetCast(); screen = "game"; openMenu("SELECT"); shopOpen = true; shopIndex = 0; }
+        else if (act === "tank") { resetCast(); screen = "game"; openMenu("SELECT"); aquariumOpen = true; aqIndex = 0; aqPointer = false; }
+      }
+      return;
+    }
+
+    // open pause / menus still available
+    if (paused) { updateMenu(); return; }
+    if (consumePress("start"))  { openMenu("START");  return; }
+    if (consumePress("select")) { openMenu("SELECT"); return; }
+
+    if (walker.moving) {
+      const tgt = townPixel(walker.tc, walker.tr);
+      const spd = 55 * dt;
+      const dx = tgt.x - walker.px, dy = tgt.y - walker.py;
+      const dist = Math.hypot(dx, dy);
+      walker.animT += dt;
+      if (dist <= spd) {
+        walker.px = tgt.x; walker.py = tgt.y; walker.c = walker.tc; walker.r = walker.tr; walker.moving = false;
+        // reached the fishing jetty END -> start fishing
+        if (townTile(walker.c, walker.r) === "E") { SFX.splash(); resetCast(); screen = "game"; blockAUntilRelease = true; }
+        // reached the end of the departures jetty -> change zone
+        else if (townTile(walker.c, walker.r) === "P" && townTile(walker.c, walker.r+1) === "Q") {
+          SFX.start(); screen = "map"; mapIndex = locationList().indexOf(currentLocation); blockAUntilRelease = true;
+        }
+      } else {
+        walker.px += dx/dist*spd; walker.py += dy/dist*spd;
+      }
+      return;
+    }
+
+    // movement
+    let nc = walker.c, nr = walker.r, dir = null;
+    if (keys.up)    { nr--; dir="up"; }
+    else if (keys.down)  { nr++; dir="down"; }
+    else if (keys.left)  { nc--; dir="left"; }
+    else if (keys.right) { nc++; dir="right"; }
+    if (dir) {
+      walker.dir = dir;
+      if (townWalkable(nc, nr)) { walker.tc = nc; walker.tr = nr; walker.moving = true; }
+    }
+
+    // interact with the tile in front (A or B)
+    if (consumePress("a") || consumePress("b")) {
+      const fc = walker.c + (walker.dir==="left"?-1:walker.dir==="right"?1:0);
+      const fr = walker.r + (walker.dir==="up"?-1:walker.dir==="down"?1:0);
+      const tl = townTile(fc, fr);
+      if (tl === "H") { SFX.door(); townEnter = 0.55; townEnterTarget = { action:"hut" }; }
+      else if (tl === "S") { SFX.door(); townEnter = 0.55; townEnterTarget = { action:"shop" }; }
+      else if (tl === "T") { SFX.door(); townEnter = 0.55; townEnterTarget = { action:"tank" }; }
+      else if (tl === "N") { showNpcDialog(); }
+      else if (tl === "Q") { SFX.start(); screen = "map"; mapIndex = locationList().indexOf(currentLocation); blockAUntilRelease = true; }
+      else if (tl === "E" || tl === "D") { SFX.splash(); resetCast(); screen = "game"; blockAUntilRelease = true; }
+    }
+  }
+
+  // The guide NPC explains how to unlock the next location.
+  function showNpcDialog(){
+    SFX.b();
+    let lines;
+    if (lang === "en") {
+      lines = [
+        "Ahoy, angler! To sail to the next spot you must fish here first 3 common fishes, 2 fine fishes, 2 prime fishes.",
+        "",
+        "Keep fishing to complete the quota!"
+      ];
+    } else {
+      lines = [
+        "Ehila', pescatore! Per salpare verso la prossima meta devi prima pescare qui 3 pesci comuni, 2 pesci pregiati, 2 pesci ottimi.",
+        "",
+        "Continua a pescare per completare la quota!"
+      ];
+    }
+    showStory(lang==="en"?"THE HARBOURMASTER":"IL CAPITANO", lines, () => { openTown(); });
+  }
+
+  function drawTown(){
+    // title bar
+    ctx.fillStyle = PAL.dark; ctx.fillRect(0,0,W,TOWN_TOP-2);
+    text(locName(currentLocation), 4, 3, PAL.textBg);
+    drawCoinsHUD();
+
+    const TH = townTheme();
+    const wA=TH.water, wB=shade(TH.water,0.18);
+    const grA=TH.grassA, grB=shade(TH.grassA,-0.08), path="#e6d8b0", pathB="#d2c090";
+    const m = townMap();
+
+    // ground pass (FRLG-style grass + light path + banded sea)
+    for (let r = 0; r < TOWN_ROWS; r++) {
+      for (let c = 0; c < TOWN_COLS; c++) {
+        const x = c*TILE, y = TOWN_TOP + r*TILE, tl = m[r][c];
+        const sea = (tl === "~" || tl === "D" || tl === "E" || tl === "P" || tl === "Q");
+        if (sea) {
+          ctx.fillStyle = wA; ctx.fillRect(x,y,TILE,TILE);
+          if (((c + r*2 + Math.floor(frame*0.05)) % 5) === 0) { ctx.fillStyle = wB; ctx.fillRect(x, y+3, 5, 1); }
+        } else {
+          // grass with a soft two-tone FRLG texture
+          ctx.fillStyle = grA; ctx.fillRect(x,y,TILE,TILE);
+          ctx.fillStyle = grB; ctx.fillRect(x, y+4, TILE, 1); ctx.fillRect(x+4, y+1, 1, 1); ctx.fillRect(x+1, y+6, 1, 1);
+          // walkable path (light sandy road)
+          if (tl === "=" || tl === "." || tl === "N") { ctx.fillStyle=path; ctx.fillRect(x,y,TILE,TILE);
+            ctx.fillStyle=pathB; ctx.fillRect(x,y+7,TILE,1); ctx.fillRect(x+7,y,1,TILE); }
+        }
+      }
+    }
+
+    // ---- three buildings spread across the top ----
+    drawBuilding(1, 1, 3, 2, TH.roof, TH.wall, "H");                     // Hut (left)
+    drawBuilding(7, 1, 3, 2, shade(TH.roof,-0.05), TH.wall, "S");        // Shop (centre)
+    drawBuilding(13, 1, 3, 2, shade(TH.roof,0.06), TH.wall, "T");        // Tank (right)
+    drawSign(2.5*TILE, TOWN_TOP+3*TILE+1, lang==="en"?"HUT":"CABINA");
+    drawSign(8.5*TILE, TOWN_TOP+3*TILE+1, lang==="en"?"SHOP":"NEGOZIO");
+    drawSign(14.5*TILE, TOWN_TOP+3*TILE+1, lang==="en"?"TANK":"ACQUARIO");
+
+    // ---- decorations: flower beds & bushes to make it cuter ----
+    drawFlowers(5, 4); drawFlowers(11, 4); drawBush(0, 4); drawBush(0, 5);
+    drawBush(17, 1); drawBush(18, 2);
+
+    // ---- fishing jetty (cols 2-3) ----
+    drawPlanks(2,3,7,10);
+    drawSign(2.5*TILE, TOWN_TOP+6*TILE+4, lang==="en"?"CREEK":"MOLO");
+    if (Math.floor(frame/16)%2===0){ ctx.fillStyle="#dff0fb"; ctx.fillRect(2*TILE+2, TOWN_TOP+11*TILE, 8, 1); }
+
+    // ---- departures jetty (cols 14-15) with a boat ----
+    drawPlanks(14,15,7,9);
+    drawBoatDock(14*TILE, TOWN_TOP+9*TILE);
+    drawSign(14.5*TILE, TOWN_TOP+6*TILE+4, lang==="en"?"DEPARTURES":"PARTENZE");
+
+    // palms on the right edge
+    for (let r=0;r<TOWN_ROWS;r++){ if (m[r][19]==="B"){ const x=19*TILE,y=TOWN_TOP+r*TILE;
+      ctx.fillStyle="#7a4e26"; ctx.fillRect(x+3,y+5,2,3);
+      ctx.fillStyle="#1f6a2a"; ctx.beginPath(); ctx.arc(x+4,y+3,4,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle="#54ad54"; ctx.beginPath(); ctx.arc(x+3,y+2,1.6,0,Math.PI*2); ctx.fill(); } }
+
+    // NPC (old fisherman)
+    for (let r=0;r<TOWN_ROWS;r++) for (let c=0;c<TOWN_COLS;c++) if (m[r][c]==="N") drawNpc(c*TILE+4, TOWN_TOP+r*TILE+7);
+
+    // walker
+    if (townEnter > 0 && townEnterTarget) {
+      ctx.save(); ctx.globalAlpha = Math.max(0, townEnter/0.55); drawWalker(walker.px, walker.py, "up"); ctx.restore();
+    } else {
+      drawWalker(walker.px, walker.py, walker.dir);
+    }
+
+    // snow overlay
+    if (TH.snow) {
+      ctx.fillStyle = "#ffffff";
+      for (let i = 0; i < 24; i++) {
+        const sx = (i*37 + Math.sin(frame*0.02+i)*5) % W;
+        const sy = (TOWN_TOP + (i*41 + frame*0.5) % (H-TOWN_TOP));
+        ctx.fillRect(Math.round(sx), Math.round(sy), 1, 1);
+      }
+    }
+
+    // interaction hint
+    const fc = walker.c + (walker.dir==="left"?-1:walker.dir==="right"?1:0);
+    const fr = walker.r + (walker.dir==="up"?-1:walker.dir==="down"?1:0);
+    const tl = townTile(fc, fr);
+    let hint = "";
+    if (tl==="H") hint = (lang==="en"?"A: Enter Hut":"A: Entra Capanna");
+    else if (tl==="S") hint = (lang==="en"?"A: Enter Shop":"A: Entra Negozio");
+    else if (tl==="T") hint = (lang==="en"?"A: Enter Tank":"A: Entra Acquario");
+    else if (tl==="N") hint = (lang==="en"?"A: Talk":"A: Parla");
+    else if (tl==="Q") hint = (lang==="en"?"A: Depart":"A: Parti");
+    else if (tl==="E"||tl==="D") hint = (lang==="en"?"A: Fish":"A: Pesca");
+    if (hint) textBox(hint, 6, 132);
+  }
+
+  // wooden plank rectangle (jetty) between cols c0..c1, rows r0..r1
+  function drawPlanks(c0,c1,r0,r1){
+    for (let r=r0;r<=r1;r++) for (let c=c0;c<=c1;c++){
+      const x=c*TILE, y=TOWN_TOP+r*TILE;
+      ctx.fillStyle="#b07a3a"; ctx.fillRect(x,y,TILE,TILE);
+      ctx.fillStyle="#8a5a28"; ctx.fillRect(x,y,TILE,1); ctx.fillRect(x,y+4,TILE,1);
+      ctx.fillStyle="#7a4a20"; ctx.fillRect(x+3,y,1,TILE);
+    }
+  }
+  // a small moored boat below the departures jetty
+  function drawBoatDock(x, y){
+    ctx.fillStyle="#e8e0d0"; // hull
+    ctx.beginPath(); ctx.moveTo(x-1,y+4); ctx.lineTo(x+17,y+4); ctx.lineTo(x+14,y+9); ctx.lineTo(x+2,y+9); ctx.closePath(); ctx.fill();
+    ctx.fillStyle="#b03028"; ctx.fillRect(x-1,y+3,18,2);      // red stripe
+    ctx.fillStyle="#c8a860"; ctx.fillRect(x+4,y-2,2,6);       // mast
+    ctx.fillStyle="#f0f0f0"; ctx.beginPath(); ctx.moveTo(x+6,y-2); ctx.lineTo(x+6,y+3); ctx.lineTo(x+12,y+3); ctx.closePath(); ctx.fill(); // sail
+  }
+
+  // decorative flower bed at a cell
+  function drawFlowers(c, r){
+    const x=c*TILE, y=TOWN_TOP+r*TILE;
+    const cols=["#e05a7a","#e8d24a","#ffffff","#c88ad8"];
+    for (let i=0;i<4;i++){ ctx.fillStyle=cols[i]; ctx.fillRect(x+1+(i%2)*4, y+1+((i/2)|0)*4, 2, 2);
+      ctx.fillStyle="#e8d24a"; ctx.fillRect(x+1+(i%2)*4+0.5, y+1+((i/2)|0)*4+0.5, 1,1); }
+  }
+  // decorative bush
+  function drawBush(c, r){
+    const x=c*TILE, y=TOWN_TOP+r*TILE;
+    ctx.fillStyle="#2e7d3a"; ctx.beginPath(); ctx.arc(x+4,y+4,3.5,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle="#40a048"; ctx.beginPath(); ctx.arc(x+3,y+3,1.5,0,Math.PI*2); ctx.fill();
+  }
+
+  // Draw a building block with roof + wall + a door tile; door char e.g. 'H','S','T'
+  function drawBuilding(c0, r0, w, h, roof, wall, doorType){
+    for (let r=r0; r<r0+h; r++){
+      for (let c=c0; c<c0+w; c++){
+        const x=c*TILE, y=TOWN_TOP+r*TILE;
+        if (r===r0){ // roof
+          ctx.fillStyle=roof; ctx.fillRect(x,y,TILE,TILE);
+          ctx.fillStyle=shade(roof,-0.22); ctx.fillRect(x,y+5,TILE,3);
+          ctx.fillStyle=shade(roof,0.3); ctx.fillRect(x,y,TILE,1);
+          if (c===c0) { ctx.fillStyle="#8a5a40"; ctx.fillRect(x+2,y-2,2,3); }
+        } else { // wall
+          ctx.fillStyle=wall; ctx.fillRect(x,y,TILE,TILE);
+          ctx.fillStyle=shade(wall,-0.16); ctx.fillRect(x,y+TILE-1,TILE,1);
+          if (c===c0 || c===c0+w-1) { ctx.fillStyle="#7fc0e8"; ctx.fillRect(x+2,y+2,4,3); ctx.strokeStyle=shade(wall,-0.3); ctx.strokeRect(x+2.5,y+2.5,3,2); }
+        }
+      }
+    }
+    const dcx = c0 + Math.floor(w/2), dr = r0+h-1;
+    setDoorTile(dcx, dr, doorType);
+    const dx=dcx*TILE, dy=TOWN_TOP+dr*TILE;
+    ctx.fillStyle="#5a3418"; ctx.fillRect(dx+2,dy+2,4,6);
+    ctx.fillStyle="#7a4a24"; ctx.fillRect(dx+3,dy+3,2,4);
+    ctx.fillStyle="#e0b040"; ctx.fillRect(dx+5,dy+5,1,1);
+  }
+  function setDoorTile(c, r, ch){
+    const row = TOWN_BASE[r];
+    if (row[c] !== ch){ TOWN_BASE[r] = row.substring(0,c) + ch + row.substring(c+1); }
+  }
+  // Readable hanging sign centered on cx, with a clear label
+  function drawSign(cx, topY, label){
+    const w = label.length*4 + 6, x = Math.round(cx - w/2), y = Math.round(topY);
+    ctx.fillStyle="#2a1c0c"; ctx.fillRect(x-1, y-1, w+2, 9);      // dark frame
+    ctx.fillStyle="#e8c878"; ctx.fillRect(x, y, w, 7);            // wood plate
+    ctx.fillStyle="#c8a860"; ctx.fillRect(x, y+5, w, 2);
+    text(label, x+3, y, "#2a1c0c");                              // 8px readable text
+  }
+
+  // Guide NPC: a harbourmaster with a blue cap and a beard (facing down)
+  function drawNpc(cx, cy){
+    const x=Math.round(cx), y=Math.round(cy)-3, OL="#20241c";
+    ctx.fillStyle="rgba(0,0,0,0.22)"; ctx.fillRect(x-4,y+8,8,2);
+    // outline
+    ctx.fillStyle=OL; ctx.fillRect(x-4,y-8,8,8); ctx.fillRect(x-4,y-1,8,7);
+    // body (navy jacket)
+    ctx.fillStyle="#2a3a6a"; ctx.fillRect(x-3,y-1,6,6);
+    ctx.fillStyle="#e8e0d0"; ctx.fillRect(x-1,y-1,2,4);   // shirt front
+    // head
+    ctx.fillStyle="#e8b088"; ctx.fillRect(x-3,y-7,6,6);
+    // white beard
+    ctx.fillStyle="#e8e8e8"; ctx.fillRect(x-3,y-2,6,2); ctx.fillRect(x-2,y-4,1,2); ctx.fillRect(x+1,y-4,1,2);
+    // blue captain cap
+    ctx.fillStyle="#1a2a5a"; ctx.fillRect(x-3,y-8,6,3); ctx.fillStyle="#e8e8e8"; ctx.fillRect(x-3,y-6,6,1);
+    ctx.fillStyle="#ffe14d"; ctx.fillRect(x-1,y-8,2,1);   // cap badge
+    // eyes
+    ctx.fillStyle="#000"; ctx.fillRect(x-2,y-4,1,1); ctx.fillRect(x+1,y-4,1,1);
+    // "!" bobbing above to signal you can talk
+    if (Math.floor(frame/24)%2===0){ ctx.fillStyle="#ffe14d"; text("!", x-1, y-14, "#ffe14d"); }
+  }
+
+  // Pokemon-GBC style walker with dark outline, big head, 4-direction, 2-step walk
+  function drawWalker(cx, cy, dir){
+    const skin = AV.skin[avatar.skin], hair = AV.hair[avatar.hair];
+    const shirt = AV.shirt[avatar.shirt], pants = AV.pants[avatar.pants], hat = AV.hat[avatar.hat];
+    const x = Math.round(cx), y = Math.round(cy) - 3;
+    // 0 = idle, 1 = left step, 2 = right step (alternates while moving)
+    const wf = walker.moving ? (Math.floor(walker.animT*7)%2===0 ? 1 : 2) : 0;
+    const OL = "#20241c";   // dark outline
+    // shadow
+    ctx.fillStyle = "rgba(0,0,0,0.22)"; ctx.fillRect(x-4, y+8, 8, 2);
+    // ---- outline pass ----
+    ctx.fillStyle = OL;
+    ctx.fillRect(x-4, y-8, 8, 8);      // head box
+    ctx.fillRect(x-4, y-1, 8, 6);      // body box
+    // legs outline positions depend on step
+    if (wf===1)      { ctx.fillRect(x-4, y+3, 3, 5); ctx.fillRect(x+1, y+4, 3, 4); }
+    else if (wf===2) { ctx.fillRect(x-4, y+4, 3, 4); ctx.fillRect(x+1, y+3, 3, 5); }
+    else             { ctx.fillRect(x-4, y+4, 3, 4); ctx.fillRect(x+1, y+4, 3, 4); }
+    // ---- leg fills (clearly alternating) ----
+    ctx.fillStyle = pants;
+    if (wf===1)      { ctx.fillRect(x-3, y+4, 2, 4); ctx.fillRect(x+1, y+5, 2, 3); }  // left forward
+    else if (wf===2) { ctx.fillRect(x-3, y+5, 2, 3); ctx.fillRect(x+1, y+4, 2, 4); }  // right forward
+    else             { ctx.fillRect(x-3, y+5, 2, 3); ctx.fillRect(x+1, y+5, 2, 3); }  // idle
+    // body (shirt)
+    ctx.fillStyle = shirt; ctx.fillRect(x-3, y-1, 6, 5);
+    // arms (swing slightly with the step)
+    ctx.fillStyle = skin;
+    if (wf===1){ ctx.fillRect(x-3, y-1, 1, 3); ctx.fillRect(x+2, y+1, 1, 3); }
+    else if (wf===2){ ctx.fillRect(x-3, y+1, 1, 3); ctx.fillRect(x+2, y-1, 1, 3); }
+    else { ctx.fillRect(x-3, y, 1, 3); ctx.fillRect(x+2, y, 1, 3); }
+    // head
+    ctx.fillStyle = skin; ctx.fillRect(x-3, y-7, 6, 6);
+    // hair / hat
+    ctx.fillStyle = hat || hair;
+    ctx.fillRect(x-3, y-8, 6, 3);
+    if (dir!=="up"){ ctx.fillRect(x-3, y-6, 1, 2); ctx.fillRect(x+2, y-6, 1, 2); }
+    // beard
+    if (avatar.beard && dir!=="up"){ ctx.fillStyle = hair; ctx.fillRect(x-2, y-2, 4, 1); ctx.fillRect(x-3,y-4,1,2); ctx.fillRect(x+2,y-4,1,2);}
+    // eyes by direction
+    ctx.fillStyle = "#20241c";
+    if (dir==="down"){ ctx.fillRect(x-2, y-4, 1,2); ctx.fillRect(x+1, y-4, 1,2); }
+    else if (dir==="left"){ ctx.fillRect(x-2, y-4, 1,2); }
+    else if (dir==="right"){ ctx.fillRect(x+1, y-4, 1,2); }
   }
 
   // ---------- FIGHT LOGIC ----------
@@ -2352,6 +2923,7 @@
     if (screen === "creator") { drawCreator(); return; }
     if (screen === "story") { drawStory(); return; }
     if (screen === "map")   { drawPostcards(); return; }
+    if (screen === "town")  { drawTown(); return; }
 
     const bg = LOCATIONS[currentLocation].background;
     const isLofoten = bg === "lofoten";
@@ -3562,9 +4134,9 @@
       ctx.fillStyle = PAL.textBg; ctx.fillRect(nx, ny, nw, 10);
       ctx.strokeStyle = PAL.dark; ctx.strokeRect(nx+0.5, ny+0.5, nw-1, 9);
       text(nm, nx + 4, ny + 1, PAL.text);
-      textBox(t("aq_release"), 6, 130);
+      textBox(fromTown ? t("back_town") : t("aq_release"), 6, 130);
     } else {
-      textBox(t("aq_names"), 6, 130);
+      textBox(fromTown ? t("back_town") : t("aq_names"), 6, 130);
     }
 
     // confirmation dialog for emptying the whole aquarium
@@ -3777,7 +4349,7 @@
     });
 
     if (menuMsg) text(menuMsg, px + 6, py + ph + 2, "#2e6a2c");
-    textBox(t("buy"), 6, 130);
+    textBox(fromTown ? t("back_town") : t("buy"), 6, 130);
   }
 
   // Zone select: choose the fishing location, with completion count
