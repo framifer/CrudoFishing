@@ -1786,6 +1786,7 @@
   let reelProgress = 0;   // 0..1 while reeling the hook back in with B (WAITING)
   let reelClickTimer = 0; // countdown between reel "click" sounds while B is held in a fight
   let reelSplashTimer = 0; // countdown between faint water-splash beds while reeling
+  let reelBuzzTimer = 0;   // countdown to re-trigger the continuous vibration while B is held in a fight
 
   // ---------- PAUSE / MENU SYSTEM ----------
   // paused == null when playing; otherwise an object describing the open menu
@@ -2825,9 +2826,14 @@
       // periodic low water-splash bed underneath the clicking
       reelSplashTimer -= dt;
       if (reelSplashTimer <= 0) { SFX.reelSplash(); reelSplashTimer = 0.22 + Math.random() * 0.12; }
+
+      // continuous buzz: re-trigger the vibration so it feels unbroken while B is held
+      reelBuzzTimer -= dt;
+      if (reelBuzzTimer <= 0) { SFX.vibrate(140); reelBuzzTimer = 0.12; }  // each buzz > interval => seamless
     } else {
       reelClickTimer = 0;  // next press clicks immediately
       reelSplashTimer = 0;
+      reelBuzzTimer = 0;
     }
     const pullForce = f.pull * (f.tired ? 0.5 : 1.0);
     let dTension;
