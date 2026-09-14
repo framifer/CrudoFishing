@@ -68,7 +68,7 @@
   #dpad {
     position: absolute;
     left: 7%; top: 8%;
-    width: 108px; height: 108px;
+    width: 140px; height: 140px;
   }
   .dbtn {
     position: absolute;
@@ -76,14 +76,14 @@
     border: none;
     box-shadow: 0 3px 0 #16161e;
     display: flex; align-items: center; justify-content: center;
-    color: #6b6b80; font-size: 12px;
+    color: #6b6b80; font-size: 15px;
   }
   .dbtn:active, .dbtn.pressed { background:#1c1c28; box-shadow: 0 1px 0 #16161e; transform: translateY(2px); }
-  #d-up    { left: 36px; top: 0;   width: 36px; height: 38px; border-radius: 6px 6px 0 0; }
-  #d-down  { left: 36px; top: 70px;width: 36px; height: 38px; border-radius: 0 0 6px 6px; }
-  #d-left  { left: 0;   top: 36px; width: 38px; height: 36px; border-radius: 6px 0 0 6px; }
-  #d-right { left: 70px;top: 36px; width: 38px; height: 36px; border-radius: 0 6px 6px 0; }
-  #d-center{ left: 36px;top: 36px; width: 36px; height: 36px; background:#2c2c3a; }
+  #d-up    { left: 47px; top: 0;   width: 46px; height: 49px; border-radius: 6px 6px 0 0; }
+  #d-down  { left: 47px; top: 91px;width: 46px; height: 49px; border-radius: 0 0 6px 6px; }
+  #d-left  { left: 0;   top: 47px; width: 49px; height: 46px; border-radius: 6px 0 0 6px; }
+  #d-right { left: 91px;top: 47px; width: 49px; height: 46px; border-radius: 0 6px 6px 0; }
+  #d-center{ left: 47px;top: 47px; width: 46px; height: 46px; background:#2c2c3a; }
   /* A / B BUTTONS */
   #ab {
     position: absolute;
@@ -93,12 +93,12 @@
   }
   .rbtn {
     position: absolute;
-    width: 58px; height: 58px;
+    width: 74px; height: 74px;
     border-radius: 50%;
     background: #9b2c6f;
     border: none;
     box-shadow: 0 4px 0 #5e1a44;
-    color: #ffd9ee; font-size: 20px; font-weight: bold;
+    color: #ffd9ee; font-size: 25px; font-weight: bold;
   }
   .rbtn:active, .rbtn.pressed { background:#7a2257; box-shadow: 0 1px 0 #5e1a44; transform: translateY(3px); }
   #btn-a { right: 0;  top: 4px; }
@@ -113,7 +113,7 @@
     transform: translateX(-50%);
     display: flex; gap: 80px;
   }
-  .pill { width: 54px; height: 16px; border-radius: 8px; background:#2c2c3a; border:none; box-shadow:0 2px 0 #16161e; }
+  .pill { width: 70px; height: 21px; border-radius: 11px; background:#2c2c3a; border:none; box-shadow:0 2px 0 #16161e; }
   .pill:active { transform: translateY(1px); box-shadow:0 1px 0 #16161e; }
   .plabel { position:absolute; color:#6b5b8a; font-size:8px; top:16px; letter-spacing:1px; }
   #startsel div { position: relative; text-align:center; }
@@ -403,6 +403,8 @@
       coin:   () => seq([[988,0.06],[1319,0.12]], "square", 0.15),
       door:   () => seq([[523,0.07],[392,0.10]], "square", 0.16),
       splash: () => seq([[440,0.05],[294,0.05],[196,0.12]], "sawtooth", 0.14),
+      // single "click" of the fishing reel ratchet (used repeatedly while reeling in a fight)
+      reel:   () => blip(150 + Math.random()*40, 0.035, "sawtooth", 0.10),
       vibrate:(pattern) => { try { if (navigator.vibrate) navigator.vibrate(pattern); } catch(e){} },
 
       // ----- background music (two tracks, low volume, looping) -----
@@ -1724,6 +1726,7 @@
   let waitTimer = 0;
   let timeToBite = 0;     // random seconds before a fish bites (set on landing)
   let reelProgress = 0;   // 0..1 while reeling the hook back in with B (WAITING)
+  let reelClickTimer = 0; // countdown between reel "click" sounds while B is held in a fight
 
   // ---------- PAUSE / MENU SYSTEM ----------
   // paused == null when playing; otherwise an object describing the open menu
@@ -1750,7 +1753,14 @@
   let blockAUntilRelease = false;  // after closing a menu with A, ignore A until released
 
   function openMenu(which) {
-    paused = MENUS[which];
+    const base = MENUS[which];
+    // Copy so we never mutate the shared MENUS definition.
+    let items = base.items.slice();
+    // In Town the "Citta" entry is pointless (you're already there): offer "Cambia zona" instead.
+    if (which === "SELECT" && screen === "town") {
+      items = items.map(it => it === "Citta" ? "Cambia zona" : it);
+    }
+    paused = { title: base.title, items: items };
     menuIndex = 0;
     menuMsg = "";
     aquariumOpen = false;
@@ -2733,6 +2743,18 @@
 
     // 2) Tension: rises when reeling (B held), falls when you release B.
     const reeling = keys.b;
+    // Reel ratchet SFX: while B is held, emit a repeating "click" like a real reel.
+    // Clicks speed up as the fish tires (you gain line faster).
+    if (reeling) {
+      reelClickTimer -= dt;
+      if (reelClickTimer <= 0) {
+        SFX.reel();
+        // interval shrinks from ~0.14s (fresh fish) down to ~0.06s (exhausted)
+        reelClickTimer = 0.06 + f.stamina * 0.08;
+      }
+    } else {
+      reelClickTimer = 0; // next press clicks immediately
+    }
     const pullForce = f.pull * (f.tired ? 0.5 : 1.0);
     let dTension;
     if (reeling) {
