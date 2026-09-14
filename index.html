@@ -208,7 +208,8 @@
       // baits
       baitVerme:"Verme", baitFondo:"Esca Profumata", baitViva:"Esca viva",
       // language screen
-      choose_lang:"SCEGLI LA LINGUA", lang_it:"Italiano", lang_en:"English"
+      choose_lang:"SCEGLI LA LINGUA", lang_it:"Italiano", lang_en:"English",
+      zone_ready:"NUOVA ZONA DISPONIBILE!", zone_ready_sub:"Vai alla mappa (SELECT)"
     },
     en: {
       press_start:"PRESS START", continue:"CONTINUE", new_game:"NEW GAME",
@@ -244,7 +245,8 @@
       titleMaster:"Master Angler", titleLegend:"Legend of the Sea",
       bronze:"Bronze Hook", silver:"Silver Hook", gold:"Gold Hook",
       baitVerme:"Worm", baitFondo:"Scented Bait", baitViva:"Live Bait",
-      choose_lang:"CHOOSE LANGUAGE", lang_it:"Italiano", lang_en:"English"
+      choose_lang:"CHOOSE LANGUAGE", lang_it:"Italiano", lang_en:"English",
+      zone_ready:"NEW ZONE AVAILABLE!", zone_ready_sub:"Go to the map (SELECT)"
     }
   };
   function t(key){ return (T[lang] && T[lang][key] !== undefined) ? T[lang][key] : (T.it[key] || key); }
@@ -619,6 +621,7 @@
   let resultTimer = 0;     // how long HOOKED/LOST message stays before returning
   let lostReason = "";     // why the fish was lost (shown on LOST screen)
   let awardPopup = null;   // {rank,timer,name} shown briefly when a new medal is earned
+  let zonePopup = null;    // {timer} shown when the next zone becomes available
   let storyPending = null; // "finale" etc. — a story to show after the catch scene
 
   // ---------- PROGRESSION / ECONOMY ----------
@@ -1009,6 +1012,8 @@
   const unlocked = { napoli: true };
   // highest award rank already celebrated per location (to avoid repeat popups)
   const awardsSeen = {};
+  // locations for which we've already shown the "next zone available" message
+  const unlockNotified = {};
 
   // How many distinct species caught in a location for a given tier
   function tierCaughtCount(locKey, tier) {
@@ -1266,6 +1271,7 @@
         avatar,
         unlocked,
         awardsSeen,
+        unlockNotified,
         lang
       };
       localStorage.setItem(SAVE_KEY, JSON.stringify(data));
@@ -1298,6 +1304,8 @@
       unlocked.napoli = true;
       Object.keys(awardsSeen).forEach(k => delete awardsSeen[k]);
       if (d.awardsSeen) Object.assign(awardsSeen, d.awardsSeen);
+      Object.keys(unlockNotified).forEach(k => delete unlockNotified[k]);
+      if (d.unlockNotified) Object.assign(unlockNotified, d.unlockNotified);
       if (d.lang) lang = d.lang;
       return true;
     } catch (e) { return false; }
@@ -1315,6 +1323,7 @@
     Object.keys(unlocked).forEach(k => delete unlocked[k]);
     unlocked.napoli = true;
     Object.keys(awardsSeen).forEach(k => delete awardsSeen[k]);
+    Object.keys(unlockNotified).forEach(k => delete unlockNotified[k]);
     saveGame();
   }
 
@@ -2296,6 +2305,15 @@
       // FINALE: gold hook at the Ross Sea completes the journey
       if (currentLocation === "ross" && rank === 3) storyPending = "finale";
     }
+
+    // check if this catch just met the requirements to unlock the NEXT location
+    const nxt = nextLocationKey(currentLocation);
+    if (nxt && !unlocked[nxt] && !unlockNotified[currentLocation] && unlockReqMet(currentLocation)) {
+      unlockNotified[currentLocation] = true;
+      zonePopup = { timer: 0 };
+      SFX.win();
+    }
+
     saveGame();   // autosave dopo ogni cattura
     state = STATE.HOOKED;
     resultTimer = 0;
@@ -3367,6 +3385,22 @@
       text(t(["","bronze","silver","gold"][awardPopup.rank]), bx + 28, by + 14, inf.color);
       awardPopup.timer += 1;
       if (awardPopup.timer > 130) awardPopup = null;
+    }
+
+    // "new zone available" popup (shown when no award popup is up)
+    if (zonePopup && !awardPopup) {
+      const bw = 140, bh = 24, bx = (W-bw)/2, by = 30;
+      ctx.fillStyle = "rgba(15,30,45,0.9)"; ctx.fillRect(bx, by, bw, bh);
+      ctx.strokeStyle = "#ffe14d"; ctx.lineWidth = 1; ctx.strokeRect(bx+0.5, by+0.5, bw-1, bh-1);
+      // little unlocked-lock icon
+      ctx.fillStyle = "#ffe14d"; ctx.fillRect(bx+8, by+11, 6, 5);
+      ctx.strokeStyle = "#ffe14d"; ctx.beginPath(); ctx.arc(bx+8, by+11, 2.5, Math.PI, 0); ctx.stroke();
+      ctx.textAlign="center";
+      text(t("zone_ready"), W/2+4, by+4, "#ffe14d");
+      text(t("zone_ready_sub"), W/2+4, by+14, "#cfe0ea");
+      ctx.textAlign="left";
+      zonePopup.timer += 1;
+      if (zonePopup.timer > 150) zonePopup = null;
     }
   }
 
