@@ -159,6 +159,189 @@
   ctx.imageSmoothingEnabled = false;
   const W = 160, H = 144;
 
+  // ---------- I18N (lingua) ----------
+  let lang = "it";   // "it" | "en"
+  const T = {
+    it: {
+      // title / menus
+      press_start:"PREMI START", continue:"CONTINUA", new_game:"NUOVA PARTITA",
+      new_game_q:"Nuova partita?", overwrite:"Sovrascrive il", the_save:"salvataggio!",
+      yes:"SI", no:"NO",
+      // pause (START)
+      pause:"PAUSA", resume:"Riprendi", music:"Musica", exit_menu:"Esci al menu",
+      music_on:"Musica: ON", music_off:"Musica: OFF",
+      // select menu
+      menu:"MENU", aquarium:"Acquario", collection:"Collezione", inventory:"Inventario",
+      shop:"Negozio", hut:"Capanna", change_zone:"Cambia zona",
+      // gameplay HUD
+      cast:"A = LANCIA", charging:"CARICA...", waiting:"IN ATTESA...", reel:"B = RITIRA",
+      reeling:"RITIRO...", bite:"ABBOCCA!", strike:"B = STRATTONE!",
+      pull:"TIRO", release:"MOLLA", recovery:"RECUPERO", tension:"TENS",
+      caught:"PRESO!", escaped:"SCAPPATO...", coins_won:"MONETE",
+      lost_late:"TROPPO TARDI", lost_snap:"LENZA SPEZZATA!", lost_slack:"LENZA LASCA!",
+      new_prize:"NUOVO PREMIO!",
+      // aquarium
+      aq_empty:"Ancora vuoto...", aq_fish_here:"Pesca qualcosa!",
+      aq_names:"B=NOMI  SEL=SVUOTA  A=ESCI", aq_release:"START=LIBERA  SEL=SVUOTA",
+      empty_q:"Svuotare l'acquario?", empty_sub:"Tutti i pesci liberati",
+      // collection categories
+      cat1:"COMUNI", cat2:"PREGIATI", cat3:"OTTIMI", cat4:"RARI",
+      arrows_exit:"FRECCE  A/B=ESCI",
+      // shop / inventory
+      shop_title:"NEGOZIO", baits:"ESCHE", buy:"B=COMPRA A=INDIETRO", use:"B=USA  A=INDIETRO",
+      equipped:"Equipaggiata:", bought:"Comprata:", no_coins:"Monete insufficienti!", empty_bait:"Esca esaurita!",
+      // map
+      go:"A/B = VAI", ticket:"Biglietto", unlock:"A/B = SBLOCCA", locked:"BLOCCATA",
+      complete_prev:"Completa la tappa precedente.", need_coins:"Ti servono",
+      unlocked_ok:"Zona sbloccata!", new_dest:"NUOVA META", choose_dest:"SCEGLI DESTINAZIONE",
+      // hut
+      hut_title:"CAPANNA DEL PESCATORE", board:"BACHECA", name_edit:"Nome (B)", confirm:"CONFERMA",
+      go_stamp:"(B = VAI)", stamp_locked:"— bloccata",
+      skin:"Pelle", hair:"Capelli", beard:"Barba", hat:"Cappello", shirt:"Maglia", pants:"Pantaloni",
+      hairNames:["Nero","Castano","Bion.sc","Biondo","Grigio","Rosso"],
+      beardNames:["Rasato","Barba"],
+      hatNames:["Nessuno","Berretto rosso","Berretto blu","Verde","Giallo","Lana"],
+      // titles / awards
+      titleNovice:"Novizio", titleFisher:"Pescatore", titleExpert:"Pescatore Esperto",
+      titleMaster:"Maestro Pescatore", titleLegend:"Leggenda del Mare",
+      bronze:"Amo di Bronzo", silver:"Amo d'Argento", gold:"Amo d'Oro",
+      // baits
+      baitVerme:"Verme", baitFondo:"Esca Profumata", baitViva:"Esca viva",
+      // language screen
+      choose_lang:"SCEGLI LA LINGUA", lang_it:"Italiano", lang_en:"English"
+    },
+    en: {
+      press_start:"PRESS START", continue:"CONTINUE", new_game:"NEW GAME",
+      new_game_q:"New game?", overwrite:"Overwrites the", the_save:"save file!",
+      yes:"YES", no:"NO",
+      pause:"PAUSE", resume:"Resume", music:"Music", exit_menu:"Exit to menu",
+      music_on:"Music: ON", music_off:"Music: OFF",
+      menu:"MENU", aquarium:"Aquarium", collection:"Collection", inventory:"Inventory",
+      shop:"Shop", hut:"Hut", change_zone:"Change zone",
+      cast:"A = CAST", charging:"CHARGING...", waiting:"WAITING...", reel:"B = REEL IN",
+      reeling:"REELING...", bite:"BITE!", strike:"B = STRIKE!",
+      pull:"PULL", release:"SLACK", recovery:"REEL", tension:"TENS",
+      caught:"CAUGHT!", escaped:"GOT AWAY...", coins_won:"COINS",
+      lost_late:"TOO SLOW", lost_snap:"LINE SNAPPED!", lost_slack:"LINE TOO SLACK!",
+      new_prize:"NEW PRIZE!",
+      aq_empty:"Still empty...", aq_fish_here:"Go catch some!",
+      aq_names:"B=NAMES  SEL=EMPTY  A=EXIT", aq_release:"START=RELEASE  SEL=EMPTY",
+      empty_q:"Empty the aquarium?", empty_sub:"All fish released",
+      cat1:"COMMON", cat2:"FINE", cat3:"PRIME", cat4:"RARE",
+      arrows_exit:"ARROWS  A/B=EXIT",
+      shop_title:"SHOP", baits:"BAITS", buy:"B=BUY  A=BACK", use:"B=USE  A=BACK",
+      equipped:"Equipped:", bought:"Bought:", no_coins:"Not enough coins!", empty_bait:"Out of bait!",
+      go:"A/B = GO", ticket:"Ticket", unlock:"A/B = UNLOCK", locked:"LOCKED",
+      complete_prev:"Complete the previous spot.", need_coins:"You need",
+      unlocked_ok:"Zone unlocked!", new_dest:"NEW DESTINATION", choose_dest:"CHOOSE DESTINATION",
+      hut_title:"FISHERMAN'S HUT", board:"BOARD", name_edit:"Name (B)", confirm:"CONFIRM",
+      go_stamp:"(B = GO)", stamp_locked:"— locked",
+      skin:"Skin", hair:"Hair", beard:"Beard", hat:"Hat", shirt:"Shirt", pants:"Pants",
+      hairNames:["Black","Brown","Dk.blond","Blond","Grey","Red"],
+      beardNames:["Shaved","Beard"],
+      hatNames:["None","Red cap","Blue cap","Green","Yellow","Wool"],
+      titleNovice:"Novice", titleFisher:"Angler", titleExpert:"Expert Angler",
+      titleMaster:"Master Angler", titleLegend:"Legend of the Sea",
+      bronze:"Bronze Hook", silver:"Silver Hook", gold:"Gold Hook",
+      baitVerme:"Worm", baitFondo:"Scented Bait", baitViva:"Live Bait",
+      choose_lang:"CHOOSE LANGUAGE", lang_it:"Italiano", lang_en:"English"
+    }
+  };
+  function t(key){ return (T[lang] && T[lang][key] !== undefined) ? T[lang][key] : (T.it[key] || key); }
+  // Map internal (Italian) menu strings to translated labels for display
+  function menuLabel(s){
+    const m = {
+      "PAUSA":"pause","Riprendi":"resume","Musica":"music","Esci al menu":"exit_menu",
+      "MENU":"menu","Acquario":"aquarium","Collezione":"collection","Inventario":"inventory",
+      "Negozio":"shop","Capanna":"hut","Cambia zona":"change_zone"
+    };
+    return m[s] ? t(m[s]) : s;
+  }
+  function baitName(key){ return t({verme:"baitVerme", fondo:"baitFondo", viva:"baitViva"}[key] || key); }
+  function catLabel(tier){ return t("cat"+tier); }
+
+  // ---------- LOCATION & SEA NAME TRANSLATIONS ----------
+  const LOC_EN = {
+    "Napoli":"Naples", "Lofoten":"Lofoten", "Rio delle Amazzoni":"Amazon River",
+    "Grande Barriera":"Great Barrier", "Kamchatka":"Kamchatka", "Monte Fuji":"Mount Fuji",
+    "Bijagos":"Bijagos", "Patagonia":"Patagonia", "Grandi Antille":"Greater Antilles",
+    "Mare di Ross":"Ross Sea"
+  };
+  const SEA_EN = {
+    "Mar Mediterraneo":"Mediterranean Sea", "Mare di Norvegia":"Norwegian Sea",
+    "Brasile":"Brazil", "Australia":"Australia", "Russia":"Russia", "Giappone":"Japan",
+    "Africa Occ.":"West Africa", "Argentina/Cile":"Argentina/Chile",
+    "USA/Caraibi":"USA/Caribbean", "Antartide":"Antarctica"
+  };
+  const FISH_EN = {
+    // Napoli
+    "Cefalo":"Mullet","Sgombro":"Mackerel","Occhiata":"Saddled Bream","Sarago":"Sea Bream",
+    "Aguglia":"Garfish","Orata":"Gilthead Bream","Spigola":"Sea Bass",
+    "Cernia":"Grouper","Ricciola":"Amberjack","Merluzzo":"Hake",
+    "Tonno":"Tuna","Pesce Spada":"Swordfish","Lampuga":"Dolphinfish",
+    // Lofoten
+    "Haddock":"Haddock","Merluzzo Nero":"Saithe","Brosme":"Cusk","Aringa Atlantica":"Atlantic Herring",
+    "Merluzzo Nordico":"Atlantic Cod","Molva":"Ling","Scorfano Atlantico":"Atlantic Redfish",
+    "Halibut":"Halibut","Lupo di Mare":"Wolffish","Smeriglio":"Porbeagle",
+    "Squalo di Groenlandia":"Greenland Shark","Halibut Gigante":"Giant Halibut","Salmone":"Salmon",
+    // Amazzonia
+    "Piranha Rosso":"Red Piranha","Paku":"Pacu","Peacock Bass":"Peacock Bass","Curimbata":"Curimbata",
+    "Tucunare Acu":"Tucunare Acu","Oscar":"Oscar","Bicuda":"Bicuda",
+    "Pirarara":"Redtail Catfish","Arowana d'Argento":"Silver Arowana","Payara":"Payara",
+    "Arapaima":"Arapaima","Piraiba":"Piraiba","Piranha Nero Gigante":"Giant Black Piranha",
+    // Australia
+    "Pesce Pappagallo":"Parrotfish","Carango d'Oro":"Golden Trevally","Lethrinus":"Emperor","Sgombro Spagnolo":"Spanish Mackerel",
+    "Coral Trout":"Coral Trout","Snapper Rosso":"Red Snapper","Mahi-Mahi":"Mahi-Mahi",
+    "Carango Gigante":"Giant Trevally","Wahoo":"Wahoo","Barramundi":"Barramundi",
+    "Marlin Nero":"Black Marlin","Squalo Tigre":"Tiger Shark","Pesce Napoleone":"Napoleon Wrasse",
+    // Kamchatka
+    "Aringa del Pacifico":"Pacific Herring","Merluzzo dell'Alaska":"Alaska Pollock","Cicloptero":"Lumpfish","Platessa del Pacifico":"Pacific Plaice",
+    "Salmon Shark":"Salmon Shark","Scorfano del Pacifico":"Pacific Rockfish","Ippoglosso del Pacifico":"Pacific Halibut",
+    "Salmone Masu":"Masu Salmon","Granchio Reale":"King Crab","Lupo di Mare Berringiano":"Bering Wolffish",
+    "Taimen Siberiano":"Siberian Taimen","Squalo delle Profondita":"Deep-sea Shark","Ippoglosso Gigante":"Giant Halibut",
+    // Fuji
+    "Aji":"Aji","Saba":"Saba","Kurodai":"Kurodai","Calamaro Reef":"Reef Squid",
+    "Dentice Rosso":"Red Snapper","Spigola Giapponese":"Japanese Sea Bass","Scorfano Giapponese":"Japanese Rockfish",
+    "Ricciola a Pinne Gialle":"Yellowtail Amberjack","Hiramasa":"Hiramasa","Sogliola":"Sole",
+    "Gran Granchio del Pacifico":"Great Pacific Crab","Mizuo":"Mizuo","Tonno Rosso Gigante":"Giant Bluefin Tuna",
+    // Bijagos
+    "Jack Crevalle":"Jack Crevalle","Ombrina Africana":"African Croaker","Pompano":"Pompano","Sgombro di Grotta":"Cave Mackerel",
+    "Snapper Africano":"African Snapper","Leccia Atlantica":"Atlantic Leerfish","Barracuda Guineano":"Guinean Barracuda",
+    "Tarpon Gigante":"Giant Tarpon","Carango Otolito":"Longfin Trevally","Squalo Toro":"Bull Shark",
+    "Pesce Violino Nero":"Black Guitarfish","Squalo Martello":"Hammerhead Shark","Pesce Vela Atlantico":"Atlantic Sailfish",
+    // Patagonia
+    "Fueguino":"Fuegian","Merluzzo Patagonico":"Patagonian Cod","Sardina Fueguina":"Fuegian Sardine","Pejerrey de Mar":"Sea Silverside",
+    "Chilean Sea Bass":"Chilean Sea Bass","Granchio Gigante":"Giant Crab","Salmone di Fiume":"River Salmon",
+    "Trota Marina":"Sea Trout","Salmone Reale":"King Salmon","Squalo Australe":"Southern Shark",
+    "Squalo Abissale":"Abyssal Shark","Merluza Negra Gigante":"Giant Toothfish","Orca Australe":"Southern Orca",
+    // Antille
+    "Snapper Coda Gialla":"Yellowtail Snapper","Grunt Striato":"Striped Grunt","Sgombro Reale":"King Mackerel","Ladyfish":"Ladyfish",
+    "Pesce Banana":"Bonefish","Permit":"Permit","Cernia Nera":"Black Grouper",
+    "Tarpon":"Tarpon","Barracuda dei Caraibi":"Caribbean Barracuda","Squalo Limone":"Lemon Shark",
+    "Marlin Blu":"Blue Marlin","Cernia Goliat":"Goliath Grouper",
+    // Ross
+    "Nototenia Antartica":"Antarctic Notothen","Krill Antartico":"Antarctic Krill","Pesce Roccia Antartico":"Antarctic Rockcod","Eglefino Antartico":"Antarctic Haddock",
+    "Pesce Ghiaccio":"Icefish","Merluzzo Antartico":"Antarctic Cod","Calamaro Lucpella":"Glass Squid",
+    "Squalo Antartico":"Antarctic Shark","Granchio Reale Antartico":"Antarctic King Crab","Calamaro Gigante":"Giant Squid",
+    "Calamaro Colossale":"Colossal Squid","Merluzzo Gigante":"Giant Cod","Foca Leopardata":"Leopard Seal"
+  };
+  // Translated display name for a location object (or key)
+  function locName(loc){
+    if (typeof loc === "string") loc = LOCATIONS[loc];
+    if (!loc) return "";
+    return lang==="en" ? (LOC_EN[loc.name] || loc.name) : loc.name;
+  }
+  function seaName(loc){
+    if (typeof loc === "string") loc = LOCATIONS[loc];
+    if (!loc) return "";
+    return lang==="en" ? (SEA_EN[loc.sea] || loc.sea) : loc.sea;
+  }
+  // Translated display name for a fish species (falls back to Italian name)
+  function fishName(sp){
+    if (!sp) return "";
+    return lang==="en" ? (FISH_EN[sp.name] || sp.name) : sp.name;
+  }
+
   // ---------- 8-BIT AUDIO ----------
   const SFX = (function () {
     let ac = null;
@@ -851,13 +1034,13 @@
 
   // ---------- NARRATIVE ----------
   const STORY = {
+    it: {
     intro: [
       "Sei un giovane pescatore di Napoli.",
       "Sogni di diventare il migliore del mondo e di collezionare ogni pesce dei sette mari.",
       "",
       "Il tuo viaggio comincia dal Golfo..."
     ],
-    // short arrival note shown when a new location is unlocked
     arrive: {
       lofoten:   "Una lettera dal Nord ti invita ai freddi Fiordi di Lofoten!",
       bijagos:   "Le maree selvagge delle Bijagos ti aspettano in Africa!",
@@ -876,7 +1059,35 @@
       "",
       "Grazie per aver giocato!"
     ]
+    },
+    en: {
+    intro: [
+      "You are a young fisherman from Naples.",
+      "You dream of becoming the best in the world and collecting every fish of the seven seas.",
+      "",
+      "Your journey begins in the Gulf..."
+    ],
+    arrive: {
+      lofoten:   "A letter from the North invites you to the cold Lofoten Fjords!",
+      bijagos:   "The wild tides of the Bijagos await you in Africa!",
+      antille:   "Set sail for the Caribbean and its offshore wrecks!",
+      amazzonia: "The Amazon River calls you into the heart of the jungle!",
+      australia: "The Great Barrier Reef shines on the horizon!",
+      fuji:      "Beneath Mount Fuji, Japan welcomes you!",
+      kamchatka: "Kamchatka's volcanic bays: cold and extreme!",
+      patagonia: "At the ends of the earth, Patagonia and its glaciers!",
+      ross:      "The final challenge: the icy Ross Sea, in Antarctica!"
+    },
+    finale: [
+      "You have tamed even the Ross Sea, the most extreme of the seas.",
+      "",
+      "From a young fisherman of Naples you have become a LEGEND!",
+      "",
+      "Thanks for playing!"
+    ]
+    }
   };
+  function storyPack(){ return STORY[lang] || STORY.it; }
 
   // A locked location can be bought if it's the immediate next after an unlocked
   // location whose unlock requirements are met.
@@ -923,11 +1134,11 @@
   // Fisherman title based on gold medals earned
   function playerTitle() {
     const g = awardTotals().gold;
-    if (g >= 10) return "Leggenda del Mare";
-    if (g >= 6)  return "Maestro Pescatore";
-    if (g >= 3)  return "Pescatore Esperto";
-    if (g >= 1)  return "Pescatore";
-    return "Novizio";
+    if (g >= 10) return t("titleLegend");
+    if (g >= 6)  return t("titleMaster");
+    if (g >= 3)  return t("titleExpert");
+    if (g >= 1)  return t("titleFisher");
+    return t("titleNovice");
   }
   // draw a fishing-hook medal of the given rank (0 = empty/locked slot)
   function drawHookMedal(cx, cy, s, rank) {
@@ -1054,7 +1265,8 @@
         currentLocation,
         avatar,
         unlocked,
-        awardsSeen
+        awardsSeen,
+        lang
       };
       localStorage.setItem(SAVE_KEY, JSON.stringify(data));
       return true;
@@ -1086,6 +1298,7 @@
       unlocked.napoli = true;
       Object.keys(awardsSeen).forEach(k => delete awardsSeen[k]);
       if (d.awardsSeen) Object.assign(awardsSeen, d.awardsSeen);
+      if (d.lang) lang = d.lang;
       return true;
     } catch (e) { return false; }
   }
@@ -1116,6 +1329,47 @@
     stampIndex = Math.max(0, locationList().indexOf(currentLocation));
     creatorToMap = !!toMap;
     blockAUntilRelease = true;
+  }
+
+  // ---------- LANGUAGE SELECT ----------
+  let langIndex = 0;   // 0 = it, 1 = en
+  function openLangSelect() {
+    langIndex = (lang === "en") ? 1 : 0;
+    screen = "lang";
+    blockAUntilRelease = true;
+  }
+  function updateLangSelect() {
+    if (consumePress("up") || consumePress("left"))   { langIndex = 0; SFX.up(); }
+    if (consumePress("down") || consumePress("right")){ langIndex = 1; SFX.down(); }
+    if (consumePress("a") || consumePress("b") || consumePress("start")) {
+      lang = langIndex === 1 ? "en" : "it";
+      SFX.start();
+      openCreator(true);   // proceed to the hut / character creation
+    }
+  }
+  function drawLangSelect() {
+    // nautical parchment look
+    drawWoodPanel(0,0,W,H);
+    const px=14, py=24, pw=W-28, ph=H-48;
+    ctx.fillStyle="#f4ecd0"; ctx.fillRect(px,py,pw,ph);
+    ctx.strokeStyle="#5a3a1a"; ctx.lineWidth=2; ctx.strokeRect(px+1,py+1,pw-2,ph-2);
+    ctx.textAlign="center";
+    text("LINGUA / LANGUAGE", W/2, py+8, "#8a2c2c");
+    // two options
+    const opts = [["Italiano","it"],["English","en"]];
+    opts.forEach((o,i)=>{
+      const yy = py+34 + i*20, sel = (i===langIndex);
+      if (sel){ ctx.fillStyle="#3fae5a"; ctx.fillRect(px+10, yy-3, pw-20, 15); }
+      // little flag square
+      ctx.fillStyle = (o[1]==="it") ? "#3fae5a" : "#3a5aa0";
+      ctx.fillRect(px+16, yy-1, 8, 6);
+      ctx.fillStyle = (o[1]==="it") ? "#e04040" : "#e04040";
+      ctx.fillRect(px+21, yy-1, 3, 6);
+      ctx.fillStyle="#ffffff"; ctx.fillRect(px+16, yy-1, 3, 6);
+      text((sel?"\u25B6 ":"  ")+o[0], W/2+6, yy-1, sel?"#0f2a1a":"#3a2a1a");
+    });
+    text("A/B = OK", W/2, H-16, "#8a2c2c");
+    ctx.textAlign="left";
   }
 
   // Show a narrative screen with the given lines; call `after` when dismissed.
@@ -1173,7 +1427,7 @@
       shown -= line.length + 1;
       y += 10;
     }
-    if (Math.floor(frame/20)%2===0) { ctx.textAlign="center"; text("\u25B6 PREMI B", W/2, H-11, "#8a2c2c"); ctx.textAlign="left"; }
+    if (Math.floor(frame/20)%2===0) { ctx.textAlign="center"; text("\u25B6 " + (lang==="en"?"PRESS B":"PREMI B"), W/2, H-11, "#8a2c2c"); ctx.textAlign="left"; }
   }
 
   function cycleAvatar(row, delta) {
@@ -1210,7 +1464,7 @@
           SFX.start(); saveGame();
           if (creatorToMap) {
             // new game: show the intro story, then go to the map
-            showStory("PROLOGO", STORY.intro, () => { screen = "map"; mapIndex = 0; });
+            showStory(lang==="en"?"PROLOGUE":"PROLOGO", storyPack().intro, () => { screen = "map"; mapIndex = 0; });
           } else { screen = "game"; }
           blockAUntilRelease = true;
         } else { cycleAvatar(creatorRow, +1); }
@@ -1270,7 +1524,7 @@
     drawWoodPanel(0, 0, W, H);
     // title sign
     ctx.fillStyle = "#3f2c16"; ctx.fillRect(0,0,W,12);
-    text("CAPANNA DEL PESCATORE", 4, 2, "#e8d0a0");
+    text(t("hut_title"), 4, 2, "#e8d0a0");
 
     const topFocus = (creatorZone === 0);
 
@@ -1286,13 +1540,13 @@
     text(avatar.name, 54, topY, "#f4e4c0");
     text(playerTitle(), 54, topY+9, "#e8c060");
 
-    const rows = ["Pelle","Capelli","Barba","Cappello","Maglia","Pantaloni","CONFERMA"];
+    const rows = [t("skin"),t("hair"),t("beard"),t("hat"),t("shirt"),t("pants"),t("confirm")];
     const valueOf = (row) => {
       switch(row){
         case 1: return "col " + (avatar.skin+1);
-        case 2: return ["Nero","Castano","Bion.sc","Biondo","Grigio","Rosso"][avatar.hair];
-        case 3: return AV.beardName[avatar.beard];
-        case 4: return AV.hatName[avatar.hat];
+        case 2: return t("hairNames")[avatar.hair];
+        case 3: return t("beardNames")[avatar.beard];
+        case 4: return t("hatNames")[avatar.hat];
         case 5: return "tin " + (avatar.shirt+1);
         case 6: return "tin " + (avatar.pants+1);
         default: return "";
@@ -1302,7 +1556,7 @@
     {
       const iy = topY + 19, sel = topFocus && creatorRow === 0;
       if (sel) { ctx.fillStyle = "#c8a860"; ctx.fillRect(53, iy-1, W-58, 9); }
-      text("Nome (B)", 54, iy, sel ? "#2a1c0c" : "#e8d0a0");
+      text(t("name_edit"), 54, iy, sel ? "#2a1c0c" : "#e8d0a0");
     }
     // two-column compact attributes (tighter, starts higher)
     for (let r = 1; r <= 6; r++) {
@@ -1318,7 +1572,7 @@
       const sel = topFocus && creatorRow === 7;
       const bx = 54, iy = topY + 52;
       if (sel) { ctx.fillStyle = "#3fae5a"; ctx.fillRect(bx-1, iy-1, W-60, 9); }
-      text("\u2713 CONFERMA", bx, iy, sel ? "#0f2a1a" : "#8ad07a");
+      text("\u2713 " + t("confirm"), bx, iy, sel ? "#0f2a1a" : "#8ad07a");
     }
 
     // divider (a wooden beam)
@@ -1326,10 +1580,10 @@
 
     // ===== BOTTOM HALF: stamp board =====
     const boardY = topY + topH + 4;
-    text("BACHECA", 6, boardY, "#e8d0a0");
+    text(t("board"), 6, boardY, "#e8d0a0");
     // totals (more room now)
     const tot = awardTotals();
-    text("Oro " + tot.gold + "  Arg " + tot.silver + "  Bro " + tot.bronze, W-100, boardY, "#f4e4c0");
+    text((lang==="en"?"Gold ":"Oro ") + tot.gold + (lang==="en"?"  Sil ":"  Arg ") + tot.silver + (lang==="en"?"  Bro ":"  Bro ") + tot.bronze, W-100, boardY, "#f4e4c0");
 
     // stamps grid (5 cols)
     const list = locationList();
@@ -1344,7 +1598,7 @@
     // selected stamp caption ONLY (placed low, below the stamps)
     if (creatorZone === 1) {
       const sel = LOCATIONS[list[stampIndex]];
-      const label = unlocked[list[stampIndex]] ? sel.name + "  (B = VAI)" : sel.name + " — bloccata";
+      const label = unlocked[list[stampIndex]] ? locName(sel) + "  " + t("go_stamp") : locName(sel) + " " + t("stamp_locked");
       ctx.textAlign = "center"; text(label, W/2, H-9, "#f4e4c0"); ctx.textAlign = "left";
     }
   }
@@ -1533,9 +1787,9 @@
         // can only equip a consumable if you have stock; Verme always available
         if (key === "verme" || (baitStock[key] || 0) > 0) {
           equippedBait = key;
-          menuMsg = "Equipaggiata: " + BAITS[key].name;
+          menuMsg = t("equipped") + " " + baitName(key);
         } else {
-          menuMsg = "Esca esaurita!";
+          menuMsg = t("empty_bait");
         }
       }
       return;
@@ -1571,9 +1825,9 @@
           coins -= price;
           baitStock[key] = (baitStock[key] || 0) + 1;
           SFX.coin();
-          menuMsg = "Comprata: " + BAITS[key].name;
+          menuMsg = t("bought") + " " + baitName(key);
         } else {
-          menuMsg = "Monete insufficienti!";
+          menuMsg = t("no_coins");
         }
       }
       return;
@@ -1644,11 +1898,11 @@
       // confirmation dialog for New Game overwrite
       if (titleConfirmNew) {
         if (consumePress("b")) {
-          // wipe progress and start fresh, then create the fisherman
+          // wipe progress and start fresh, then choose language -> creator
           resetProgress();
           titleConfirmNew = false;
           SFX.start();
-          openCreator(true);
+          openLangSelect();
         } else if (consumePress("a")) {
           titleConfirmNew = false;
         }
@@ -1670,11 +1924,14 @@
           if (mapIndex < 0) mapIndex = 0;
         } else {
           if (canContinue) { titleConfirmNew = true; }   // ask before overwriting
-          else { resetProgress(); SFX.start(); openCreator(true); }
+          else { resetProgress(); SFX.start(); openLangSelect(); }
         }
       }
       return;
     }
+
+    // ----- LANGUAGE SELECT -----
+    if (screen === "lang") { updateLangSelect(); return; }
 
     // ----- CHARACTER CREATOR -----
     if (screen === "creator") { updateCreator(); return; }
@@ -1712,17 +1969,17 @@
             SFX.coin(); SFX.win();
             saveGame();
             // narrative arrival note (then it stays on the map)
-            if (STORY.arrive[key]) {
-              const lines = [ STORY.arrive[key] ];
-              showStory("NUOVA META", lines, () => { screen = "map"; mapMsg=""; });
+            if (storyPack().arrive[key]) {
+              const lines = [ storyPack().arrive[key] ];
+              showStory(t("new_dest"), lines, () => { screen = "map"; mapMsg=""; });
             } else {
-              mapMsg = "Biglietto pagato! Zona sbloccata.";
+              mapMsg = t("unlocked_ok");
             }
           } else {
-            mapMsg = "Ti servono " + price + " monete!";
+            mapMsg = t("need_coins") + " " + price + "!";
           }
         } else {
-          mapMsg = "Zona bloccata: completa la tappa precedente.";
+          mapMsg = t("locked") + ": " + t("complete_prev");
         }
       }
       return;
@@ -1814,7 +2071,7 @@
         if (storyPending === "finale") {
           storyPending = null;
           resetCast();
-          showStory("EPILOGO", STORY.finale, () => { screen = "game"; });
+          showStory(lang==="en"?"EPILOGUE":"EPILOGO", storyPack().finale, () => { screen = "game"; });
         } else {
           resetCast();
         }
@@ -2063,6 +2320,7 @@
     frame++;
 
     if (screen === "title") { drawTitle(); return; }
+    if (screen === "lang") { drawLangSelect(); return; }
     if (screen === "creator") { drawCreator(); return; }
     if (screen === "story") { drawStory(); return; }
     if (screen === "map")   { drawPostcards(); return; }
@@ -2264,26 +2522,26 @@
     // ---- UI per stato ----
     if (state === STATE.AIM) {
       drawAimTarget();
-      textBox("A = LANCIA", 6, 130);
+      textBox(t("cast"), 6, 130);
       drawBaitHUD();
     }
     else if (state === STATE.CASTING) {
       drawAimTarget();
       drawPowerBar();
-      textBox("CARICA...", 6, 6);
+      textBox(t("charging"), 6, 6);
     }
     else if (state === STATE.WAITING) {
-      textBox("IN ATTESA...", 6, 6);
+      textBox(t("waiting"), 6, 6);
       if (keys.b && reelProgress > 0) {
-        textBox("RITIRO...", 6, 130);
+        textBox(t("reeling"), 6, 130);
         drawReelBar();
       } else {
-        textBox("B = RITIRA", 6, 130);
+        textBox(t("reel"), 6, 130);
       }
     }
     else if (state === STATE.BITE) {
-      textBox("ABBOCCA!", 6, 6);
-      textBox("B = STRATTONE!", 6, 130);
+      textBox(t("bite"), 6, 6);
+      textBox(t("strike"), 6, 130);
     }
     else if (state === STATE.FIGHT) {
       drawFightHUD();
@@ -2322,22 +2580,22 @@
     const ty = by + (1 - f.tension) * bh;
     ctx.fillStyle = PAL.white; ctx.fillRect(bx-2, ty-1, bw+4, 3);
     // label
-    text("TENS", bx-6, 6, PAL.white);
+    text(t("tension"), bx-6, 6, PAL.white);
 
     // --- Horizontal catch-progress bar (bottom) ---
     const cx = 6, cy = 128, cw = 120, ch = 8;
     ctx.fillStyle = PAL.dark; ctx.fillRect(cx-1, cy-1, cw+2, ch+2);
     ctx.fillStyle = PAL.textBg; ctx.fillRect(cx, cy, cw, ch);
     ctx.fillStyle = "#2e7d32"; ctx.fillRect(cx, cy, cw * f.catchProg, ch);
-    text("RECUPERO", cx, cy - 10, PAL.white);
+    text(t("recovery"), cx, cy - 10, PAL.white);
 
     // --- prompts ---
-    if (keys.b) textBox("TIRO", 6, 6);
-    else        textBox("MOLLA", 6, 6);
+    if (keys.b) textBox(t("pull"), 6, 6);
+    else        textBox(t("release"), 6, 6);
 
     // fish name + tier
     if (f.fish) {
-      textBox(f.fish.name, 6, 18);
+      textBox(fishName(f.fish), 6, 18);
     }
 
     // flash the bar red when in danger
@@ -3048,7 +3306,7 @@
   function drawBaitHUD() {
     const b = BAITS[equippedBait];
     const qty = (equippedBait === "verme") ? "\u221E" : String(baitStock[equippedBait] || 0);
-    const label = b.name + " x" + qty;
+    const label = baitName(equippedBait) + " x" + qty;
     const w = label.length * 5 + 14;
     const x = 4, y = 4;
     ctx.fillStyle = PAL.textBg; ctx.fillRect(x, y, w, 11);
@@ -3094,8 +3352,8 @@
     }
 
     // banner + reward + name
-    drawBanner((cf.name || "PRESO") + "!", "#2e7d32", 108);
-    textBox("+" + lastReward + " MONETE", 6, 6);
+    drawBanner((cf.name ? fishName(cf) : t("caught")) + "!", "#2e7d32", 108);
+    textBox("+" + lastReward + " " + t("coins_won"), 6, 6);
     drawCoinsHUD();
 
     // new-award popup (medal + name)
@@ -3105,10 +3363,10 @@
       ctx.fillStyle = "rgba(15,30,20,0.85)"; ctx.fillRect(bx, by, bw, bh);
       ctx.strokeStyle = inf.color; ctx.lineWidth = 1; ctx.strokeRect(bx+0.5, by+0.5, bw-1, bh-1);
       drawHookMedal(bx + 14, by + 13, 1.1, awardPopup.rank);
-      text("NUOVO PREMIO!", bx + 28, by + 4, "#ffe14d");
-      text(awardPopup.name, bx + 28, by + 14, inf.color);
+      text(t("new_prize"), bx + 28, by + 4, "#ffe14d");
+      text(t(["","bronze","silver","gold"][awardPopup.rank]), bx + 28, by + 14, inf.color);
       awardPopup.timer += 1;
-      if (awardPopup.timer > 130) awardPopup = null;   // ~ shown for the scene
+      if (awardPopup.timer > 130) awardPopup = null;
     }
   }
 
@@ -3121,8 +3379,9 @@
       const sc = Math.max(0.8, 1.6 * ((escaper.y - HORIZON) / (H - HORIZON)));
       drawFishSprite(escaper.x, escaper.y, sc, "#7aa8c8", "#5f8aa8", -1);
     }
-    drawBanner("SCAPPATO...", "#8a2c2c", 108);
-    textBox(lostReason || "PERSO", 6, 6);
+    drawBanner(t("escaped"), "#8a2c2c", 108);
+    const lr = { "TROPPO TARDI":"lost_late", "LENZA SPEZZATA!":"lost_snap", "LENZA LASCA!":"lost_slack" };
+    textBox(lr[lostReason] ? t(lr[lostReason]) : (lostReason || ""), 6, 6);
     drawCoinsHUD();
   }
 
@@ -3149,18 +3408,19 @@
     const px = (W - pw) / 2, py = 28;
     ctx.fillStyle = PAL.textBg; ctx.fillRect(px, py, pw, ph);
     ctx.strokeStyle = PAL.dark; ctx.lineWidth = 1; ctx.strokeRect(px+0.5, py+0.5, pw-1, ph-1);
-    // title
+    // title (translated)
     ctx.fillStyle = PAL.dark; ctx.fillRect(px, py, pw, 12);
-    text(paused.title, px + 6, py + 2, PAL.textBg);
+    text(menuLabel(paused.title), px + 6, py + 2, PAL.textBg);
     // items
     paused.items.forEach((it, i) => {
       const iy = py + 16 + i * 12;
+      const lbl = menuLabel(it);
       if (i === menuIndex) {
         ctx.fillStyle = "#3fae5a";
         ctx.fillRect(px + 3, iy - 1, pw - 6, 11);
-        text("\u25B6 " + it, px + 6, iy, PAL.dark);
+        text("\u25B6 " + lbl, px + 6, iy, PAL.dark);
       } else {
-        text("  " + it, px + 6, iy, PAL.text);
+        text("  " + lbl, px + 6, iy, PAL.text);
       }
     });
     // transient message
@@ -3215,7 +3475,7 @@
     // glass frame + title
     ctx.strokeStyle = "#bfe3f5"; ctx.lineWidth = 2; ctx.strokeRect(tx+1, ty+1, tw-2, th-2);
     ctx.fillStyle = PAL.dark; ctx.fillRect(tx, ty-12, tw, 12);
-    text("ACQUARIO (" + aquarium.length + ")", tx + 4, ty - 10, PAL.textBg);
+    text(t("aquarium").toUpperCase() + " (" + aquarium.length + ")", tx + 4, ty - 10, PAL.textBg);
 
     if (aquarium.length === 0) {
       text("Ancora vuoto...", tx + 20, ty + 40, PAL.white);
@@ -3251,16 +3511,16 @@
       ctx.lineWidth = 1;
       ctx.strokeRect(selX-11, selY-9, 22, 18);
       const sel = aquarium[aqIndex];
-      const nm = sel.name + "  " + (sel.size ? Math.round(sel.size*40+10) + "cm" : "");
+      const nm = fishName(sel) + "  " + (sel.size ? Math.round(sel.size*40+10) + "cm" : "");
       const nw = nm.length * 5 + 8;
       const nx = Math.max(tx+2, Math.min(tx+tw-nw-2, selX - nw/2));
       const ny = Math.max(ty+2, selY-22);
       ctx.fillStyle = PAL.textBg; ctx.fillRect(nx, ny, nw, 10);
       ctx.strokeStyle = PAL.dark; ctx.strokeRect(nx+0.5, ny+0.5, nw-1, 9);
       text(nm, nx + 4, ny + 1, PAL.text);
-      textBox("START=LIBERA  SEL=SVUOTA", 6, 130);
+      textBox(t("aq_release"), 6, 130);
     } else {
-      textBox("B=NOMI  SEL=SVUOTA  A=ESCI", 6, 130);
+      textBox(t("aq_names"), 6, 130);
     }
 
     // confirmation dialog for emptying the whole aquarium
@@ -3270,11 +3530,11 @@
       ctx.fillStyle = PAL.textBg; ctx.fillRect(dx, dy, dw, dh);
       ctx.strokeStyle = PAL.dark; ctx.lineWidth = 1; ctx.strokeRect(dx+0.5, dy+0.5, dw-1, dh-1);
       ctx.textAlign = "center";
-      text("Svuotare l'acquario?", W/2, dy+6, "#8a2c2c");
-      text("Tutti i pesci liberati", W/2, dy+18, PAL.text);
+      text(t("empty_q"), W/2, dy+6, "#8a2c2c");
+      text(t("empty_sub"), W/2, dy+18, PAL.text);
       ctx.textAlign = "left";
-      text("B = SI", dx+10, dy+32, "#2e6a2c");
-      text("A = NO", dx+dw-40, dy+32, "#8a2c2c");
+      text("B = " + t("yes"), dx+10, dy+32, "#2e6a2c");
+      text("A = " + t("no"), dx+dw-40, dy+32, "#8a2c2c");
     }
   }
 
@@ -3327,7 +3587,7 @@
     ctx.strokeStyle = PAL.dark; ctx.lineWidth = 1; ctx.strokeRect(px+0.5, py+0.5, pw-1, ph-1);
     // title
     ctx.fillStyle = PAL.dark; ctx.fillRect(px, py, pw, 12);
-    text("ESCHE", px + 6, py + 2, PAL.textBg);
+    text(t("baits"), px + 6, py + 2, PAL.textBg);
 
     list.forEach((key, i) => {
       const b = BAITS[key];
@@ -3340,7 +3600,7 @@
       ctx.fillStyle = b.color; ctx.fillRect(px + 6, iy + 1, 6, 6);
       // name
       const nameCol = (i === invIndex) ? PAL.dark : PAL.text;
-      text(b.name, px + 16, iy, nameCol);
+      text(baitName(key), px + 16, iy, nameCol);
       // stock / permanent
       const qty = (key === "verme") ? "\u221E" : String(baitStock[key] || 0);
       text("x" + qty, px + pw - 40, iy, nameCol);
@@ -3349,7 +3609,7 @@
     });
 
     if (menuMsg) text(menuMsg, px + 6, py + ph + 2, "#2e6a2c");
-    textBox("B=USA  A=INDIETRO", 6, 130);
+    textBox(t("use"), 6, 130);
   }
 
   // Collection (Fishdex): grid of all species in the current location.
@@ -3365,7 +3625,7 @@
     const px = 6, py = 16, pw = W - 12, ph = 112;
     ctx.fillStyle = "#173f7a"; ctx.fillRect(px, py, pw, ph);
     ctx.fillStyle = PAL.dark; ctx.fillRect(px, py, pw, 12);
-    text(loc.name + "  " + got + "/" + total, px + 4, py + 2, PAL.textBg);
+    text(locName(loc) + "  " + got + "/" + total, px + 4, py + 2, PAL.textBg);
     // award medals for THIS location (top-right): bronze, silver, gold slots
     const award = locationAward(currentLocation);
     [1,2,3].forEach((rank, i) => {
@@ -3394,7 +3654,7 @@
       // category header
       ctx.fillStyle = TIERS[row.tier].color;
       ctx.fillRect(px + 4, rowY + 1, 4, 4);
-      text(TIERS[row.tier].catName, px + 12, rowY, "#bfe3f5");
+      text(catLabel(row.tier), px + 12, rowY, "#bfe3f5");
       // fish icons
       row.list.forEach((sp, j) => {
         const cx = px + 16 + j * 26;
@@ -3419,7 +3679,7 @@
       ctx.strokeStyle = (Math.floor(frame/6)%2===0) ? "#ffe14d" : "#ffffff";
       ctx.lineWidth = 1;
       ctx.strokeRect(selInfo.cx-11, selInfo.cy-9, 22, 18);
-      const nm = selInfo.isCaught ? selInfo.sp.name : "???";
+      const nm = selInfo.isCaught ? fishName(selInfo.sp) : "???";
       const nw = nm.length * 5 + 8;
       const nx = Math.max(px+2, Math.min(px+pw-nw-2, selInfo.cx - nw/2));
       const ny = selInfo.cy + 9;
@@ -3435,7 +3695,7 @@
     if (collScroll > 1) text("\u25B2", px+pw-10, viewTop, "#bfe3f5");
     if (collScroll < rows.length*rowH - viewH - 1) text("\u25BC", px+pw-10, viewBot-9, "#bfe3f5");
 
-    textBox("FRECCE  A/B=ESCI", 6, 130);
+    textBox(t("arrows_exit"), 6, 130);
   }
 
   // Rows for the Fishdex: one per tier, in order (comuni -> rari)
@@ -3459,7 +3719,7 @@
     ctx.fillStyle = PAL.textBg; ctx.fillRect(px, py, pw, ph);
     ctx.strokeStyle = PAL.dark; ctx.lineWidth = 1; ctx.strokeRect(px+0.5, py+0.5, pw-1, ph-1);
     ctx.fillStyle = PAL.dark; ctx.fillRect(px, py, pw, 12);
-    text("NEGOZIO  $" + coins, px + 4, py + 2, PAL.textBg);
+    text(t("shop_title") + "  $" + coins, px + 4, py + 2, PAL.textBg);
 
     list.forEach((key, i) => {
       const b = BAITS[key];
@@ -3467,13 +3727,13 @@
       if (i === shopIndex) { ctx.fillStyle = "#3fae5a"; ctx.fillRect(px + 3, iy - 2, pw - 6, 17); }
       const col = (i === shopIndex) ? PAL.dark : PAL.text;
       ctx.fillStyle = b.color; ctx.fillRect(px + 6, iy + 1, 6, 6);
-      text(b.name, px + 16, iy, col);
+      text(baitName(key), px + 16, iy, col);
       text("$" + b.cost, px + pw - 52, iy, col);
       text("(x" + (baitStock[key]||0) + ")", px + pw - 28, iy, col);
     });
 
     if (menuMsg) text(menuMsg, px + 6, py + ph + 2, "#2e6a2c");
-    textBox("B=COMPRA A=INDIETRO", 6, 130);
+    textBox(t("buy"), 6, 130);
   }
 
   // Zone select: choose the fishing location, with completion count
@@ -3579,7 +3839,7 @@
     const canContinue = hasSave();
     ctx.textAlign = "center";
     if (canContinue) {
-      const items = ["CONTINUA", "NUOVA PARTITA"];
+      const items = [t("continue"), t("new_game")];
       items.forEach((it, i) => {
         const yy = 108 + i*14;
         if (i === titleIndex) {
@@ -3589,7 +3849,7 @@
         }
       });
     } else {
-      if (Math.floor(frame/20) % 2 === 0) { ctx.fillStyle = "#ffffff"; ctx.fillText("PREMI  START", W/2, 116); }
+      if (Math.floor(frame/20) % 2 === 0) { ctx.fillStyle = "#ffffff"; ctx.fillText(t("press_start"), W/2, 116); }
     }
     ctx.textAlign = "left";
 
@@ -3600,12 +3860,12 @@
       ctx.fillStyle = PAL.textBg; ctx.fillRect(dx, dy, dw, dh);
       ctx.strokeStyle = PAL.dark; ctx.lineWidth = 1; ctx.strokeRect(dx+0.5, dy+0.5, dw-1, dh-1);
       ctx.textAlign = "center";
-      text("Nuova partita?", W/2, dy+6, "#8a2c2c");
-      text("Sovrascrive il", W/2, dy+18, PAL.text);
-      text("salvataggio!", W/2, dy+27, PAL.text);
+      text(t("new_game_q"), W/2, dy+6, "#8a2c2c");
+      text(t("overwrite"), W/2, dy+18, PAL.text);
+      text(t("the_save"), W/2, dy+27, PAL.text);
       ctx.textAlign = "left";
-      text("B = SI", dx+10, dy+36, "#2e6a2c");
-      text("A = NO", dx+dw-40, dy+36, "#8a2c2c");
+      text("B = " + t("yes"), dx+10, dy+36, "#2e6a2c");
+      text("A = " + t("no"), dx+dw-40, dy+36, "#8a2c2c");
     }
   }
 
@@ -3619,7 +3879,7 @@
 
     // title bar
     ctx.fillStyle = PAL.dark; ctx.fillRect(0, 0, W, 12);
-    text("SCEGLI DESTINAZIONE", 4, 2, PAL.textBg);
+    text(t("choose_dest"), 4, 2, PAL.textBg);
 
     const list = locationList();
     const key = list[mapIndex];
@@ -3701,20 +3961,19 @@
     ctx.strokeStyle = "#5a3a1a"; ctx.lineWidth = 1; ctx.strokeRect(bx+0.5, barY+0.5, bw-1, barH-1);
     ctx.textAlign = "center";
     if (mapMsg) {
-      text(sel.name, W/2, barY + 2, "#3a2a1a");
+      text(locName(sel), W/2, barY + 2, "#3a2a1a");
       text(mapMsg, W/2, barY + 11, "#8a2c2c");
     } else if (unlocked[selKey]) {
-      text(sel.name + "  \u2691", W/2, barY + 2, "#3a2a1a");
-      text(sel.sea + "   A/B = VAI", W/2, barY + 11, "#6a5a3a");
+      text(locName(sel) + "  \u2691", W/2, barY + 2, "#3a2a1a");
+      text(seaName(sel) + "   " + t("go"), W/2, barY + 11, "#6a5a3a");
     } else if (mapPurchasable(selKey)) {
-      text(sel.name + "  \uD83D\uDD13", W/2, barY + 2, "#2e6a2c");
-      text("Biglietto $" + ticketPriceFor(selKey) + "  A/B = SBLOCCA", W/2, barY + 11, "#2e6a2c");
+      text(locName(sel) + "  \uD83D\uDD13", W/2, barY + 2, "#2e6a2c");
+      text(t("ticket") + " $" + ticketPriceFor(selKey) + "  " + t("unlock"), W/2, barY + 11, "#2e6a2c");
     } else {
-      // show what's missing in the previous location
       const i = LOCATION_ORDER.indexOf(selKey);
       const prev = i>0 ? LOCATION_ORDER[i-1] : null;
-      text(sel.name + "  (BLOCCATA)", W/2, barY + 2, "#8a2c2c");
-      if (prev) text("Completa " + LOCATIONS[prev].name + ": F1 3, F2 2, F3 2", W/2, barY + 11, "#8a2c2c");
+      text(locName(sel) + "  (" + t("locked") + ")", W/2, barY + 2, "#8a2c2c");
+      if (prev) text((lang==="en"?"Finish ":"Completa ") + locName(LOCATIONS[prev]) + ": F1 3, F2 2, F3 2", W/2, barY + 11, "#8a2c2c");
     }
     ctx.textAlign = "left";
   }
