@@ -353,10 +353,10 @@
   // Tier patterns drive the fight behaviour (reused by every future location).
   // pattern: 1=quasi ferma, 2=oscilla regolare, 3=scatti, 4=frenesia
   const TIERS = {
-    1: { name:"Facile",       catName:"COMUNI",   biteChance:0.60, pattern:1, valueBase:10,  color:"#8fbf7f", fin:"#6f9f5f" },
-    2: { name:"Medio",        catName:"PREGIATI", biteChance:0.25, pattern:2, valueBase:25,  color:"#5aa0d8", fin:"#3f7fb8" },
-    3: { name:"Difficile",    catName:"OTTIMI",   biteChance:0.12, pattern:3, valueBase:60,  color:"#e0a030", fin:"#b87f20" },
-    4: { name:"Leggendario",  catName:"RARI",     biteChance:0.03, pattern:4, valueBase:150, color:"#c8506f", fin:"#9b2c4f" }
+    1: { name:"Facile",       catName:"COMUNI",   biteChance:0.60, pattern:1, valueBase:10,  sizeScale:0.75, color:"#8fbf7f", fin:"#6f9f5f" },
+    2: { name:"Medio",        catName:"PREGIATI", biteChance:0.25, pattern:2, valueBase:25,  sizeScale:1.0,  color:"#5aa0d8", fin:"#3f7fb8" },
+    3: { name:"Difficile",    catName:"OTTIMI",   biteChance:0.12, pattern:3, valueBase:60,  sizeScale:1.3,  color:"#e0a030", fin:"#b87f20" },
+    4: { name:"Leggendario",  catName:"RARI",     biteChance:0.03, pattern:4, valueBase:150, sizeScale:1.7,  color:"#c8506f", fin:"#9b2c4f" }
   };
 
   const LOCATIONS = {
@@ -570,6 +570,96 @@
           { name:"Pesce Vela Atlantico", color:"#3a5a8a", fin:"#5a8ac0", sword:true, big:true }
         ]
       }
+    },
+
+    patagonia: {
+      name: "Patagonia",
+      sea:  "Argentina/Cile",
+      background: "patagonia",   // Darwin range glaciers, flag-trees, lighthouse
+      mapPos: { x: 40, y: 108 },
+      fish: {
+        1: [
+          { name:"Fueguino",           color:"#9aa8b0", fin:"#7a8890" },
+          { name:"Merluzzo Patagonico",color:"#a8a088", fin:"#888068" },
+          { name:"Sardina Fueguina",   color:"#c0ccd4", fin:"#98a4ac", stripes:true },
+          { name:"Pejerrey de Mar",    color:"#b8c8d0", fin:"#90a0a8", long:true }
+        ],
+        2: [
+          { name:"Chilean Sea Bass",   color:"#7a8288", fin:"#5a6268", big:true },
+          { name:"Granchio Gigante", color:"#c85030", fin:"#8a2e18", crab:true },
+          { name:"Salmone di Fiume",   color:"#e08a6a", fin:"#c05a4a", stripes:true }
+        ],
+        3: [
+          { name:"Trota Marina",       color:"#b0a878", fin:"#e0c040", stripes:true },
+          { name:"Salmone Reale",      color:"#e0906a", fin:"#c05a3a", big:true },
+          { name:"Squalo Australe",    color:"#7a8890", fin:"#586470", big:true }
+        ],
+        4: [
+          { name:"Squalo Abissale",    color:"#2e343c", fin:"#1a1e24", big:true },
+          { name:"Merluza Negra Gigante",color:"#3a4048", fin:"#22262c", big:true },
+          { name:"Orca Australe",      color:"#101014", fin:"#ffffff", orca:true, big:true }
+        ]
+      }
+    },
+
+    antille: {
+      name: "Grandi Antille",
+      sea:  "USA/Caraibi",
+      background: "antille",    // Seven Mile Bridge, lighthouse, mangroves, flats
+      mapPos: { x: 36, y: 66 },
+      fish: {
+        1: [
+          { name:"Snapper Coda Gialla", color:"#e0c050", fin:"#e05a5a" },
+          { name:"Grunt Striato",       color:"#c0c8a0", fin:"#5aa0d8", stripes:true },
+          { name:"Sgombro Reale",       color:"#5f9fc8", fin:"#3f7fa8", long:true },
+          { name:"Ladyfish",            color:"#c8d4dc", fin:"#a0b0bc", long:true }
+        ],
+        2: [
+          { name:"Pesce Banana", color:"#d8dce0", fin:"#b0b8c0", long:true },
+          { name:"Permit",       color:"#c4ccd2", fin:"#8a9aa0", big:true },
+          { name:"Cernia Nera",  color:"#4a4e54", fin:"#2e3238", big:true }
+        ],
+        3: [
+          { name:"Tarpon",              color:"#c0c8d0", fin:"#9098a0", big:true },
+          { name:"Barracuda dei Caraibi",color:"#8a9aa0", fin:"#5a6a70", long:true },
+          { name:"Squalo Limone",       color:"#c8c080", fin:"#a0985a", big:true }
+        ],
+        4: [
+          { name:"Marlin Blu",     color:"#2a4a8a", fin:"#4a7ac0", sword:true, big:true },
+          { name:"Squalo Martello",color:"#7a8890", fin:"#586470", big:true },
+          { name:"Cernia Goliat",  color:"#7a7050", fin:"#585038", big:true }
+        ]
+      }
+    },
+
+    ross: {
+      name: "Mare di Ross",
+      sea:  "Antartide",
+      background: "ross",       // ice shelf, cobalt icebergs, icebreaker, penguins
+      mapPos: { x: 90, y: 128 },
+      fish: {
+        1: [
+          { name:"Nototenia Antartica",   color:"#9aa8b0", fin:"#7a8890" },
+          { name:"Krill Antartico",       color:"#e08a70", fin:"#c05a48", krill:true },
+          { name:"Pesce Roccia Antartico",color:"#7a7266", fin:"#5a5246" },
+          { name:"Eglefino Antartico",    color:"#b8bcc4", fin:"#8f96a0" }
+        ],
+        2: [
+          { name:"Pesce Ghiaccio",  color:"#c8e4ee", fin:"#a0c8d8", ghost:true },
+          { name:"Merluzzo Antartico",color:"#a8a088", fin:"#888068" },
+          { name:"Calamaro Lucpella",color:"#c8a0d0", fin:"#a070b0", squid:true }
+        ],
+        3: [
+          { name:"Squalo Antartico", color:"#7a8890", fin:"#586470", big:true },
+          { name:"Granchio Reale Antartico", color:"#c85030", fin:"#8a2e18", crab:true },
+          { name:"Calamaro Gigante", color:"#d06a80", fin:"#a04a60", squid:true, big:true }
+        ],
+        4: [
+          { name:"Calamaro Colossale",color:"#e07088", fin:"#b04a60", squid:true, big:true },
+          { name:"Merluzzo Gigante",  color:"#9a9070", fin:"#787050", big:true },
+          { name:"Foca Leopardata",   color:"#8a9098", fin:"#5a6068", seal:true, big:true }
+        ]
+      }
     }
   };
 
@@ -588,6 +678,38 @@
 
   // Fishdex: set of caught species keys "location:name"
   const caught = {};   // e.g. { "napoli:Cefalo": {count, best} }
+
+  // Assign dedicated sprite shapes to species by matching keywords in their names.
+  // (crab/squid/orca/krill/seal/ghost already handled via explicit flags)
+  (function assignShapes() {
+    const rules = [
+      { shape:"hammer",   test:/martello/i },
+      { shape:"sailfish", test:/vela/i },
+      { shape:"billfish", test:/marlin|spada|aguglia/i },
+      { shape:"tuna",     test:/tonno/i },
+      { shape:"flat",     test:/halibut|ippoglosso|sogliola|platessa/i },
+      { shape:"napoleon", test:/napoleone/i },
+      { shape:"parrot",   test:/pappagallo/i },
+      { shape:"piranha",  test:/piranha/i },
+      { shape:"scorpion", test:/scorfano/i },
+      { shape:"shark",    test:/squalo|smeriglio|salmon shark/i },
+      { shape:"long",     test:/barracuda|wahoo|bicuda|arowana|ladyfish|pesce banana|anguilla/i },
+      { shape:"arapaima", test:/arapaima|piraiba|taimen/i },
+      { shape:"grouper",  test:/cernia|grouper/i },
+      { shape:"salmon",   test:/salmone|salmon|trota/i },
+      { shape:"herring",  test:/aringa|sardina|sgombro|saba|pejerrey/i },
+      { shape:"mahi",     test:/mahi/i },
+      { shape:"tarpon",   test:/tarpon/i },
+      { shape:"jack",     test:/carango|jack|leccia|permit|pompano/i },
+      { shape:"snapper",  test:/snapper|dentice/i }
+    ];
+    Object.values(LOCATIONS).forEach(loc => {
+      [1,2,3,4].forEach(t => loc.fish[t].forEach(sp => {
+        if (sp.shape || sp.crab || sp.squid || sp.orca || sp.krill || sp.seal) return;
+        for (const r of rules) { if (r.test.test(sp.name)) { sp.shape = r.shape; break; } }
+      }));
+    });
+  })();
 
   let currentLocation = "napoli";
 
@@ -608,6 +730,7 @@
     const size = 0.7 + Math.random() * 0.6;
     const value = Math.round(TIERS[tier].valueBase * size);
     return { tier, name: species.name, species, size, value,
+             tierScale: TIERS[tier].sizeScale,
              color: species.color, fin: species.fin };
   }
 
@@ -1269,8 +1392,14 @@
     landedFish = fish;
     aquarium.push({ name: fish.name, value: fish.value, tier: fish.tier,
                     color: fish.color, fin: fish.fin, size: fish.size,
+                    tierScale: fish.tierScale || (TIERS[fish.tier] && TIERS[fish.tier].sizeScale) || 1,
                     crab: !!(fish.species && fish.species.crab),
                     squid: !!(fish.species && fish.species.squid),
+                    orca: !!(fish.species && fish.species.orca),
+                    krill: !!(fish.species && fish.species.krill),
+                    seal: !!(fish.species && fish.species.seal),
+                    ghost: !!(fish.species && fish.species.ghost),
+                    shape: (fish.species && fish.species.shape) || null,
                     location: currentLocation });
     coins += fish.value;
     lastReward = fish.value;
@@ -1314,6 +1443,9 @@
     const isKam     = bg === "kamchatka";
     const isFuji    = bg === "fuji";
     const isBijagos = bg === "bijagos";
+    const isPatagonia = bg === "patagonia";
+    const isAntille = bg === "antille";
+    const isRoss = bg === "ross";
 
     // Sky
     const g = ctx.createLinearGradient(0,0,0,HORIZON);
@@ -1333,6 +1465,15 @@
     } else if (isBijagos) {
       // warm tropical African sky (hazy blue to sandy warmth)
       g.addColorStop(0, "#5aa8d8"); g.addColorStop(0.6, "#bfe0ea"); g.addColorStop(1, "#f0e2c0");
+    } else if (isPatagonia) {
+      // brighter cool austral sky (soft blue to pale)
+      g.addColorStop(0, "#8aa6c0"); g.addColorStop(0.6, "#c0d2dc"); g.addColorStop(1, "#e4eef2");
+    } else if (isAntille) {
+      // bright Caribbean sky
+      g.addColorStop(0, "#2f9ee0"); g.addColorStop(0.6, "#8fd6ee"); g.addColorStop(1, "#d8f4f2");
+    } else if (isRoss) {
+      // pale, cold Antarctic sky (icy blue to near-white)
+      g.addColorStop(0, "#9fc0d8"); g.addColorStop(0.6, "#d0e4ee"); g.addColorStop(1, "#eef6fa");
     } else {
       g.addColorStop(0, PAL.skyTop); g.addColorStop(1, PAL.skyBot);
     }
@@ -1366,6 +1507,19 @@
       ctx.beginPath(); ctx.arc(126, HORIZON-14, 12, 0, Math.PI*2); ctx.fill();
       ctx.fillStyle = "#fff0b0";
       ctx.beginPath(); ctx.arc(126, HORIZON-14, 8, 0, Math.PI*2); ctx.fill();
+    } else if (isPatagonia) {
+      // soft bright sun through thin clouds
+      ctx.fillStyle = "rgba(255,250,235,0.55)";
+      ctx.beginPath(); ctx.arc(120, HORIZON-20, 12, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = "rgba(255,250,235,0.8)";
+      ctx.beginPath(); ctx.arc(120, HORIZON-20, 7, 0, Math.PI*2); ctx.fill();
+    } else if (isAntille) {
+      // bright tropical sun
+      ctx.fillStyle = "#fff3b0"; ctx.beginPath(); ctx.arc(30, HORIZON-16, 9, 0, Math.PI*2); ctx.fill();
+    } else if (isRoss) {
+      // low pale polar sun
+      ctx.fillStyle = "rgba(255,250,240,0.7)";
+      ctx.beginPath(); ctx.arc(36, HORIZON-10, 7, 0, Math.PI*2); ctx.fill();
     } else {
       ctx.fillStyle = "#fff3b0"; ctx.beginPath(); ctx.arc(isReef?134:120, HORIZON-8, 9, 0, Math.PI*2); ctx.fill();
     }
@@ -1390,19 +1544,28 @@
       // calm Pacific blue with a soft dawn tint on top
       gw.addColorStop(0, "#8fc4dc"); gw.addColorStop(0.35, "#4f96c0"); gw.addColorStop(1, "#2a5f8a");
     } else if (isBijagos) {
-      // warm tropical estuary water (teal-green, slightly turbid)
-      gw.addColorStop(0, "#5fb8a8"); gw.addColorStop(0.4, "#3f9088"); gw.addColorStop(1, "#265f5a");
+      // bright sea-green marine water (verde acqua)
+      gw.addColorStop(0, "#6fd8c0"); gw.addColorStop(0.4, "#3fb0a0"); gw.addColorStop(1, "#237a72");
+    } else if (isPatagonia) {
+      // cool but brighter blue subantarctic sea
+      gw.addColorStop(0, "#7fb0c4"); gw.addColorStop(0.4, "#5690a8"); gw.addColorStop(1, "#356274");
+    } else if (isAntille) {
+      // bright clear Caribbean flats (light turquoise)
+      gw.addColorStop(0, "#9ff0e8"); gw.addColorStop(0.4, "#5fd8d8"); gw.addColorStop(1, "#2fa8c8");
+    } else if (isRoss) {
+      // black, crystalline Antarctic ocean
+      gw.addColorStop(0, "#2a4658"); gw.addColorStop(0.4, "#16303f"); gw.addColorStop(1, "#0a1a24");
     } else {
       gw.addColorStop(0, PAL.seaHi); gw.addColorStop(0.4, PAL.sea2); gw.addColorStop(1, PAL.sea1);
     }
     ctx.fillStyle = gw; ctx.fillRect(0, HORIZON, W, H-HORIZON);
 
     // Perspective wave lines
-    const verticalCurrent = (isLofoten || isReef);
+    const verticalCurrent = (isLofoten || isReef || isPatagonia || isRoss);
     if (verticalCurrent) {
       // Upward-flowing current: vertical streaks, thick/long near the bottom,
       // tapering and FADING OUT before reaching the far shore (horizon).
-      const streakRgb = isLofoten ? "120,180,205" : "170,235,235";
+      const streakRgb = isLofoten ? "120,180,205" : isPatagonia ? "150,185,205" : isRoss ? "90,150,200" : "170,235,235";
       const lanes = 16;
       const period = H - HORIZON;
       const fadeStart = HORIZON + period * 0.32;  // vanish above this band
@@ -1424,8 +1587,8 @@
         }
       }
     } else {
-      ctx.fillStyle = isAmazon ? "#7fd0c0" : isKam ? "#7a8f98" : isFuji ? "#a8d4e8" : isBijagos ? "#8fd8c8" : PAL.seaHi;
-      const speedMul = isFuji ? 0.3 : 1;   // calmer, slower water at Fuji
+      ctx.fillStyle = isAmazon ? "#7fd0c0" : isKam ? "#7a8f98" : isFuji ? "#a8d4e8" : isBijagos ? "#a0eeda" : isPatagonia ? "#8aacba" : isAntille ? "#c8f4ee" : PAL.seaHi;
+      const speedMul = isFuji ? 0.3 : isBijagos ? 0.4 : isAntille ? 0.35 : 1;   // calmer water at Fuji/Bijagos/Antille
       for (let i = 0; i < 22; i++) {
         const t = i / 22;
         const y = HORIZON + t * t * (H - HORIZON);   // denser near horizon
@@ -1441,6 +1604,25 @@
     if (LOCATIONS[currentLocation].background === "napoli") {
       drawBoat(90 + Math.sin(frame*0.02)*3,  HORIZON+8,  "#ffffff", "#c0392b");
       drawBoat(126 + Math.cos(frame*0.017)*3, HORIZON+14, "#f0f0f0", "#2a5db0");
+    }
+
+    // Bijagos: islands scattered out in the sea (drawn on top of the water)
+    if (LOCATIONS[currentLocation].background === "bijagos") {
+      drawBijagosSeaIslands();
+    }
+    // Patagonia: grey/blue ice floes drifting on the water
+    if (LOCATIONS[currentLocation].background === "patagonia") {
+      drawPatagoniaIce();
+    }
+    // Antille: reef patches at the surface, sandy shoals, a half-sunken wreck
+    if (LOCATIONS[currentLocation].background === "antille") {
+      drawAntilleWater();
+    }
+    // Ross: floating cobalt icebergs on the black sea
+    if (LOCATIONS[currentLocation].background === "ross") {
+      drawIceberg(46 + Math.sin(frame*0.01)*2, HORIZON+14, 9);
+      drawIceberg(112 + Math.cos(frame*0.012)*2, HORIZON+26, 13);
+      drawIceberg(20 + Math.sin(frame*0.009)*2, HORIZON+34, 8);
     }
 
     // Dock / pier in the foreground (bottom), receding slightly
@@ -1606,7 +1788,578 @@
   function drawCreature(sp, cx, cy, scale, dir, vertical) {
     if (sp && sp.crab) return drawCrabSprite(cx, cy, scale, sp.color, sp.fin);
     if (sp && sp.squid) return drawSquidSprite(cx, cy, scale, sp.color, sp.fin, dir);
+    if (sp && sp.orca) return drawOrcaSprite(cx, cy, scale, dir);
+    if (sp && sp.krill) return drawShrimpSprite(cx, cy, scale, sp.color, sp.fin, dir);
+    if (sp && sp.seal) return drawSealSprite(cx, cy, scale, sp.color, dir);
+    // shape-based dedicated sprites
+    if (sp && sp.shape === "shark")    return drawSharkSprite(cx, cy, scale, sp.color, sp.fin, dir, false);
+    if (sp && sp.shape === "hammer")   return drawSharkSprite(cx, cy, scale, sp.color, sp.fin, dir, true);
+    if (sp && sp.shape === "billfish") return drawBillfishSprite(cx, cy, scale, sp.color, sp.fin, dir, false);
+    if (sp && sp.shape === "sailfish") return drawBillfishSprite(cx, cy, scale, sp.color, sp.fin, dir, true);
+    if (sp && sp.shape === "tuna")     return drawTunaSprite(cx, cy, scale, sp.color, sp.fin, dir);
+    if (sp && sp.shape === "flat")     return drawFlatfishSprite(cx, cy, scale, sp.color, sp.fin, dir);
+    if (sp && sp.shape === "napoleon") return drawNapoleonSprite(cx, cy, scale, sp.color, sp.fin, dir);
+    if (sp && sp.shape === "parrot")   return drawParrotSprite(cx, cy, scale, sp.color, sp.fin, dir);
+    if (sp && sp.shape === "piranha")  return drawPiranhaSprite(cx, cy, scale, sp.color, sp.fin, dir);
+    if (sp && sp.shape === "scorpion") return drawScorpionSprite(cx, cy, scale, sp.color, sp.fin, dir);
+    if (sp && sp.shape === "long")     return drawLongfishSprite(cx, cy, scale, sp.color, sp.fin, dir);
+    if (sp && sp.shape === "salmon")   return drawSalmonSprite(cx, cy, scale, sp.color, sp.fin, dir);
+    if (sp && sp.shape === "grouper")  return drawGrouperSprite(cx, cy, scale, sp.color, sp.fin, dir);
+    if (sp && sp.shape === "arapaima") return drawArapaimaSprite(cx, cy, scale, sp.color, sp.fin, dir);
+    if (sp && sp.shape === "herring")  return drawHerringSprite(cx, cy, scale, sp.color, sp.fin, dir);
+    if (sp && sp.shape === "jack")     return drawJackSprite(cx, cy, scale, sp.color, sp.fin, dir);
+    if (sp && sp.shape === "snapper")  return drawSnapperSprite(cx, cy, scale, sp.color, sp.fin, dir);
+    if (sp && sp.shape === "mahi")     return drawMahiSprite(cx, cy, scale, sp.color, sp.fin, dir);
+    if (sp && sp.shape === "tarpon")   return drawTarponSprite(cx, cy, scale, sp.color, sp.fin, dir);
+    if (sp && sp.ghost) {
+      ctx.save(); ctx.globalAlpha = 0.45;
+      drawFishSprite(cx, cy, scale, sp.color, sp.fin, dir, vertical);
+      ctx.restore(); return;
+    }
     return drawFishSprite(cx, cy, scale, sp ? sp.color : "#5aa0d8", sp ? sp.fin : "#3f7fb8", dir, vertical);
+  }
+
+  // Shark: pointed snout, tall triangular dorsal fin, crescent tail. hammer=true for hammerhead
+  function drawSharkSprite(cx, cy, scale, bodyColor, finColor, dir, hammer) {
+    const s = scale, d = dir || 1;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(d, 1);
+    ctx.fillStyle = bodyColor;
+    // torpedo body tapering to a pointed snout (right)
+    ctx.beginPath();
+    ctx.moveTo(-6*s, 0);
+    ctx.quadraticCurveTo(-2*s, -3*s, 5*s, -1.5*s);
+    ctx.lineTo(7*s, 0);
+    ctx.quadraticCurveTo(5*s, 1.5*s, -2*s, 3*s);
+    ctx.quadraticCurveTo(-4*s, 2*s, -6*s, 0);
+    ctx.closePath(); ctx.fill();
+    // crescent tail
+    ctx.beginPath();
+    ctx.moveTo(-6*s, 0); ctx.lineTo(-10*s, -4*s); ctx.lineTo(-8*s, 0); ctx.lineTo(-10*s, 4*s);
+    ctx.closePath(); ctx.fill();
+    // tall dorsal fin
+    ctx.beginPath();
+    ctx.moveTo(-1*s, -2.5*s); ctx.lineTo(0, -7*s); ctx.lineTo(2*s, -2*s); ctx.closePath(); ctx.fill();
+    // pectoral fin
+    ctx.beginPath(); ctx.moveTo(1*s, 1.5*s); ctx.lineTo(3*s, 5*s); ctx.lineTo(4*s, 1.5*s); ctx.closePath(); ctx.fill();
+    // belly lighter
+    ctx.fillStyle = "#e8ecee"; ctx.fillRect(-3*s, 1.5*s, 7*s, 1*s);
+    if (hammer) {
+      // hammer head (wide crossbar at the snout)
+      ctx.fillStyle = bodyColor;
+      ctx.fillRect(6*s, -4*s, 2*s, 8*s);
+      ctx.fillStyle = "#000";
+      ctx.fillRect(6.3*s, -3.5*s, 1*s, 1*s); ctx.fillRect(6.3*s, 2.5*s, 1*s, 1*s);   // eyes on the ends
+    } else {
+      ctx.fillStyle = "#000"; ctx.fillRect(4*s, -0.8*s, 1*s, 1*s);   // eye
+      // gill slits
+      ctx.strokeStyle = finColor; ctx.lineWidth = Math.max(1, s*0.5);
+      for (let i = 0; i < 3; i++){ ctx.beginPath(); ctx.moveTo((2-i)*s, -1*s); ctx.lineTo((2-i)*s, 1*s); ctx.stroke(); }
+    }
+    ctx.restore();
+  }
+
+  // Billfish (marlin/swordfish): long pointed bill; sail=true adds a big dorsal sail
+  function drawBillfishSprite(cx, cy, scale, bodyColor, finColor, dir, sail) {
+    const s = scale, d = dir || 1;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(d, 1);
+    ctx.fillStyle = bodyColor;
+    // streamlined body
+    ctx.beginPath();
+    ctx.moveTo(-6*s, 0);
+    ctx.quadraticCurveTo(-1*s, -2.5*s, 4*s, -1*s);
+    ctx.lineTo(4*s, 1*s);
+    ctx.quadraticCurveTo(-1*s, 2.5*s, -6*s, 0);
+    ctx.closePath(); ctx.fill();
+    // long bill/rostrum
+    ctx.fillRect(4*s, -0.5*s, 6*s, 1*s);
+    // forked tail
+    ctx.beginPath();
+    ctx.moveTo(-6*s, 0); ctx.lineTo(-9*s, -3*s); ctx.lineTo(-7*s, 0); ctx.lineTo(-9*s, 3*s);
+    ctx.closePath(); ctx.fill();
+    if (sail) {
+      // big dorsal sail
+      ctx.fillStyle = finColor;
+      ctx.beginPath();
+      ctx.moveTo(-3*s, -1.5*s); ctx.quadraticCurveTo(0, -8*s, 3*s, -1.5*s);
+      ctx.closePath(); ctx.fill();
+    } else {
+      // small dorsal fin
+      ctx.fillStyle = finColor;
+      ctx.beginPath(); ctx.moveTo(-1*s, -2*s); ctx.lineTo(0, -4.5*s); ctx.lineTo(1*s, -2*s); ctx.closePath(); ctx.fill();
+    }
+    // pelvic fin
+    ctx.fillStyle = finColor; ctx.fillRect(0, 1.5*s, 1*s, 3*s);
+    // eye
+    ctx.fillStyle = "#fff"; ctx.fillRect(2.5*s, -1*s, 1.2*s, 1.2*s);
+    ctx.fillStyle = "#000"; ctx.fillRect(2.8*s, -0.7*s, 0.7*s, 0.7*s);
+    ctx.restore();
+  }
+
+  // Tuna: stout torpedo body, deeply forked crescent tail, finlets
+  function drawTunaSprite(cx, cy, scale, bodyColor, finColor, dir) {
+    const s = scale, d = dir || 1;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(d, 1);
+    ctx.fillStyle = bodyColor;
+    // fat oval body
+    ctx.beginPath(); ctx.ellipse(0, 0, 6*s, 4*s, 0, 0, Math.PI*2); ctx.fill();
+    // pointed snout
+    ctx.beginPath(); ctx.moveTo(5*s, -1.5*s); ctx.lineTo(8*s, 0); ctx.lineTo(5*s, 1.5*s); ctx.closePath(); ctx.fill();
+    // crescent (lunate) tail
+    ctx.beginPath();
+    ctx.moveTo(-6*s, 0); ctx.lineTo(-10*s, -5*s); ctx.lineTo(-7.5*s, 0); ctx.lineTo(-10*s, 5*s);
+    ctx.closePath(); ctx.fill();
+    // dorsal + anal fins (finlets)
+    ctx.fillStyle = finColor;
+    ctx.beginPath(); ctx.moveTo(0, -4*s); ctx.lineTo(2*s, -6*s); ctx.lineTo(3*s, -3.5*s); ctx.closePath(); ctx.fill();
+    for (let i = -5; i <= -2; i++){ ctx.fillRect(i*s, -4.2*s, 0.6*s, 1*s); ctx.fillRect(i*s, 3.2*s, 0.6*s, 1*s); }
+    // pectoral fin
+    ctx.beginPath(); ctx.moveTo(1*s, 2*s); ctx.lineTo(3*s, 5*s); ctx.lineTo(4*s, 2*s); ctx.closePath(); ctx.fill();
+    // silver belly
+    ctx.fillStyle = "#e8ecee"; ctx.fillRect(-4*s, 2*s, 8*s, 1.5*s);
+    // eye
+    ctx.fillStyle = "#000"; ctx.fillRect(4*s, -1*s, 1*s, 1*s);
+    ctx.restore();
+  }
+
+  // Flatfish (halibut/sole/plaice): flat oval, both eyes on top, wavy edge fins
+  function drawFlatfishSprite(cx, cy, scale, bodyColor, finColor, dir) {
+    const s = scale, d = dir || 1;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(d, 1);
+    // wide flat oval body
+    ctx.fillStyle = bodyColor;
+    ctx.beginPath(); ctx.ellipse(0, 0, 7*s, 3.5*s, 0, 0, Math.PI*2); ctx.fill();
+    // fringe of fin around the edge
+    ctx.fillStyle = finColor;
+    for (let a = 0; a < Math.PI*2; a += 0.5) {
+      const rx = Math.cos(a)*7*s, ry = Math.sin(a)*3.5*s;
+      ctx.fillRect(rx, ry, 1*s, 1*s);
+    }
+    // small tail
+    ctx.beginPath(); ctx.moveTo(-7*s, 0); ctx.lineTo(-9*s, -2*s); ctx.lineTo(-9*s, 2*s); ctx.closePath(); ctx.fill();
+    // both eyes on the upper side (near the front)
+    ctx.fillStyle = "#fff"; ctx.fillRect(3*s, -1.5*s, 1.4*s, 1.4*s); ctx.fillRect(4.6*s, -1.5*s, 1.4*s, 1.4*s);
+    ctx.fillStyle = "#000"; ctx.fillRect(3.4*s, -1.1*s, 0.7*s, 0.7*s); ctx.fillRect(5*s, -1.1*s, 0.7*s, 0.7*s);
+    // speckles
+    ctx.fillStyle = finColor;
+    ctx.fillRect(-2*s, 0, 1*s, 1*s); ctx.fillRect(0, -1*s, 1*s, 1*s); ctx.fillRect(1*s, 1*s, 1*s, 1*s);
+    ctx.restore();
+  }
+
+  // Napoleon wrasse: big body with a pronounced forehead hump
+  function drawNapoleonSprite(cx, cy, scale, bodyColor, finColor, dir) {
+    const s = scale, d = dir || 1;
+    ctx.save(); ctx.translate(cx, cy); ctx.scale(d, 1);
+    ctx.fillStyle = bodyColor;
+    // tall rounded body
+    ctx.beginPath(); ctx.ellipse(-1*s, 0, 6*s, 5*s, 0, 0, Math.PI*2); ctx.fill();
+    // forehead hump (bulging up-front)
+    ctx.beginPath(); ctx.ellipse(3*s, -3*s, 2.5*s, 2.5*s, 0, 0, Math.PI*2); ctx.fill();
+    // thick lips/snout
+    ctx.fillRect(5*s, -1*s, 2*s, 2*s);
+    // tail
+    ctx.beginPath(); ctx.moveTo(-6*s, 0); ctx.lineTo(-9*s, -4*s); ctx.lineTo(-9*s, 4*s); ctx.closePath(); ctx.fill();
+    // fins
+    ctx.fillStyle = finColor;
+    ctx.fillRect(-2*s, -5*s, 5*s, 1*s); ctx.fillRect(-2*s, 4*s, 5*s, 1*s);
+    // wavy face lines (wrasse markings)
+    ctx.strokeStyle = finColor; ctx.lineWidth = Math.max(1,s*0.5);
+    ctx.beginPath(); ctx.moveTo(4*s,-1*s); ctx.lineTo(2*s,1*s); ctx.stroke();
+    // eye
+    ctx.fillStyle = "#fff"; ctx.fillRect(3*s, -1*s, 1.3*s, 1.3*s);
+    ctx.fillStyle = "#000"; ctx.fillRect(3.3*s, -0.7*s, 0.7*s, 0.7*s);
+    ctx.restore();
+  }
+
+  // Parrotfish: beak-like mouth, rounded reef body, bright fins
+  function drawParrotSprite(cx, cy, scale, bodyColor, finColor, dir) {
+    const s = scale, d = dir || 1;
+    ctx.save(); ctx.translate(cx, cy); ctx.scale(d, 1);
+    ctx.fillStyle = bodyColor;
+    ctx.beginPath(); ctx.ellipse(0, 0, 6*s, 4*s, 0, 0, Math.PI*2); ctx.fill();
+    // beak (two blocks like a parrot's beak)
+    ctx.fillStyle = "#d8e0c0";
+    ctx.fillRect(5*s, -1.5*s, 2.5*s, 1.5*s); ctx.fillRect(5*s, 0.2*s, 2.5*s, 1.3*s);
+    // bright crescent tail
+    ctx.fillStyle = finColor;
+    ctx.beginPath(); ctx.moveTo(-6*s, 0); ctx.lineTo(-9*s, -3*s); ctx.lineTo(-7.5*s, 0); ctx.lineTo(-9*s, 3*s); ctx.closePath(); ctx.fill();
+    // colorful dorsal & pectoral fins
+    ctx.fillRect(-2*s, -5*s, 6*s, 1.5*s);
+    ctx.beginPath(); ctx.moveTo(0, 2*s); ctx.lineTo(2*s, 5*s); ctx.lineTo(3*s, 2*s); ctx.closePath(); ctx.fill();
+    // scale pattern
+    ctx.fillStyle = finColor;
+    for (let i=-3;i<=2;i++) ctx.fillRect(i*1.5*s, ((i%2)? -1: 0)*s, 1*s, 1*s);
+    // eye
+    ctx.fillStyle = "#fff"; ctx.fillRect(3*s, -1*s, 1.3*s, 1.3*s);
+    ctx.fillStyle = "#000"; ctx.fillRect(3.3*s, -0.7*s, 0.7*s, 0.7*s);
+    ctx.restore();
+  }
+
+  // Piranha: stout deep body, jutting lower jaw with teeth
+  function drawPiranhaSprite(cx, cy, scale, bodyColor, finColor, dir) {
+    const s = scale, d = dir || 1;
+    ctx.save(); ctx.translate(cx, cy); ctx.scale(d, 1);
+    ctx.fillStyle = bodyColor;
+    // deep chunky body
+    ctx.beginPath(); ctx.ellipse(-1*s, 0, 5*s, 4.5*s, 0, 0, Math.PI*2); ctx.fill();
+    // jutting jaw
+    ctx.fillRect(3*s, 0, 3*s, 2.5*s);
+    // teeth
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(3.5*s, 1.5*s, 0.6*s, 1*s); ctx.fillRect(4.4*s, 1.5*s, 0.6*s, 1*s); ctx.fillRect(5.3*s, 1.5*s, 0.6*s, 1*s);
+    // tail
+    ctx.fillStyle = bodyColor;
+    ctx.beginPath(); ctx.moveTo(-5*s, 0); ctx.lineTo(-8*s, -3*s); ctx.lineTo(-8*s, 3*s); ctx.closePath(); ctx.fill();
+    // reddish belly
+    ctx.fillStyle = "#c84a3a"; ctx.fillRect(-3*s, 2*s, 6*s, 1.5*s);
+    // fins
+    ctx.fillStyle = finColor; ctx.fillRect(-2*s, -5*s, 3*s, 1*s);
+    // angry eye
+    ctx.fillStyle = "#ffe14d"; ctx.fillRect(2*s, -2*s, 1.4*s, 1.4*s);
+    ctx.fillStyle = "#000"; ctx.fillRect(2.4*s, -1.6*s, 0.7*s, 0.7*s);
+    ctx.restore();
+  }
+
+  // Scorpionfish: spiky body with venomous dorsal spines, big head
+  function drawScorpionSprite(cx, cy, scale, bodyColor, finColor, dir) {
+    const s = scale, d = dir || 1;
+    ctx.save(); ctx.translate(cx, cy); ctx.scale(d, 1);
+    ctx.fillStyle = bodyColor;
+    // lumpy body + big head
+    ctx.beginPath(); ctx.ellipse(0, 0, 6*s, 4*s, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(4*s, 0, 3*s, 3.5*s, 0, 0, Math.PI*2); ctx.fill();
+    // spiky dorsal spines
+    ctx.fillStyle = finColor;
+    for (let i=-4;i<=2;i++){ ctx.beginPath(); ctx.moveTo(i*1.5*s, -3*s); ctx.lineTo(i*1.5*s+0.6*s, -6*s); ctx.lineTo(i*1.5*s+1.2*s, -3*s); ctx.closePath(); ctx.fill(); }
+    // spiny pectoral fan
+    ctx.beginPath(); ctx.moveTo(0, 2*s); ctx.lineTo(-2*s, 6*s); ctx.lineTo(3*s, 5*s); ctx.closePath(); ctx.fill();
+    // tail
+    ctx.fillStyle = bodyColor; ctx.beginPath(); ctx.moveTo(-6*s,0); ctx.lineTo(-8*s,-3*s); ctx.lineTo(-8*s,3*s); ctx.closePath(); ctx.fill();
+    // mottling
+    ctx.fillStyle = finColor; ctx.fillRect(-1*s,-1*s,1*s,1*s); ctx.fillRect(1*s,1*s,1*s,1*s);
+    // eye
+    ctx.fillStyle = "#ffcf50"; ctx.fillRect(4*s, -1.5*s, 1.3*s, 1.3*s);
+    ctx.fillStyle = "#000"; ctx.fillRect(4.3*s, -1.1*s, 0.7*s, 0.7*s);
+    ctx.restore();
+  }
+
+  // Long slender fish (barracuda/wahoo/needlefish/eel-like): elongated body, pointed jaw
+  function drawLongfishSprite(cx, cy, scale, bodyColor, finColor, dir) {
+    const s = scale, d = dir || 1;
+    ctx.save(); ctx.translate(cx, cy); ctx.scale(d, 1);
+    ctx.fillStyle = bodyColor;
+    // long thin body
+    ctx.beginPath();
+    ctx.moveTo(-9*s, 0);
+    ctx.quadraticCurveTo(-2*s, -2*s, 7*s, -1*s);
+    ctx.lineTo(9*s, 0);                  // pointed snout
+    ctx.lineTo(7*s, 1*s);
+    ctx.quadraticCurveTo(-2*s, 2*s, -9*s, 0);
+    ctx.closePath(); ctx.fill();
+    // forked tail
+    ctx.beginPath(); ctx.moveTo(-9*s, 0); ctx.lineTo(-12*s, -3*s); ctx.lineTo(-10*s, 0); ctx.lineTo(-12*s, 3*s); ctx.closePath(); ctx.fill();
+    // small fins
+    ctx.fillStyle = finColor;
+    ctx.fillRect(-2*s, -2.2*s, 3*s, 0.8*s); ctx.fillRect(-2*s, 1.4*s, 3*s, 0.8*s);
+    // lateral stripe
+    ctx.fillRect(-6*s, -0.3*s, 10*s, 0.6*s);
+    // jaw line + eye
+    ctx.strokeStyle = finColor; ctx.lineWidth = Math.max(1,s*0.4);
+    ctx.beginPath(); ctx.moveTo(4*s, 0.6*s); ctx.lineTo(8*s, 0.6*s); ctx.stroke();
+    ctx.fillStyle = "#fff"; ctx.fillRect(4*s, -1*s, 1.2*s, 1.2*s);
+    ctx.fillStyle = "#000"; ctx.fillRect(4.3*s, -0.7*s, 0.7*s, 0.7*s);
+    ctx.restore();
+  }
+
+  // Salmon: streamlined body, hooked jaw (kype), spotted back, reddish flank
+  function drawSalmonSprite(cx, cy, scale, bodyColor, finColor, dir) {
+    const s = scale, d = dir || 1;
+    ctx.save(); ctx.translate(cx, cy); ctx.scale(d, 1);
+    ctx.fillStyle = bodyColor;
+    // torpedo body
+    ctx.beginPath();
+    ctx.moveTo(-6*s, 0); ctx.quadraticCurveTo(-1*s, -3.5*s, 5*s, -1.5*s);
+    ctx.lineTo(6*s, 0); ctx.quadraticCurveTo(5*s, 1*s, 4*s, 1.5*s);
+    ctx.quadraticCurveTo(-1*s, 3.5*s, -6*s, 0); ctx.closePath(); ctx.fill();
+    // hooked lower jaw (kype)
+    ctx.fillRect(5*s, 0.5*s, 2*s, 1*s);
+    ctx.beginPath(); ctx.moveTo(6*s, 1.5*s); ctx.lineTo(7*s, -0.5*s); ctx.lineTo(6*s, -0.5*s); ctx.closePath(); ctx.fill();
+    // forked tail
+    ctx.beginPath(); ctx.moveTo(-6*s, 0); ctx.lineTo(-9*s, -3*s); ctx.lineTo(-7*s, 0); ctx.lineTo(-9*s, 3*s); ctx.closePath(); ctx.fill();
+    // reddish flank stripe (spawning colors)
+    ctx.fillStyle = "#c85040"; ctx.fillRect(-4*s, -0.5*s, 8*s, 1.5*s);
+    // dorsal + adipose fins
+    ctx.fillStyle = finColor;
+    ctx.beginPath(); ctx.moveTo(-1*s, -2.5*s); ctx.lineTo(1*s, -4.5*s); ctx.lineTo(2*s, -2*s); ctx.closePath(); ctx.fill();
+    ctx.fillRect(-4*s, -2*s, 1.2*s, 0.8*s);   // adipose
+    // spots on the back
+    ctx.fillStyle = "#3a3a3a";
+    ctx.fillRect(-2*s,-1.5*s,1*s,1*s); ctx.fillRect(0,-2*s,1*s,1*s); ctx.fillRect(2*s,-1.2*s,1*s,1*s);
+    // eye
+    ctx.fillStyle = "#fff"; ctx.fillRect(3*s, -1*s, 1.2*s, 1.2*s);
+    ctx.fillStyle = "#000"; ctx.fillRect(3.3*s, -0.7*s, 0.7*s, 0.7*s);
+    ctx.restore();
+  }
+
+  // Grouper: massive stocky body, huge mouth, small fins
+  function drawGrouperSprite(cx, cy, scale, bodyColor, finColor, dir) {
+    const s = scale, d = dir || 1;
+    ctx.save(); ctx.translate(cx, cy); ctx.scale(d, 1);
+    ctx.fillStyle = bodyColor;
+    // big oval body
+    ctx.beginPath(); ctx.ellipse(-1*s, 0, 6.5*s, 5*s, 0, 0, Math.PI*2); ctx.fill();
+    // large jaw / wide mouth
+    ctx.fillRect(4*s, -1*s, 3*s, 3*s);
+    ctx.fillStyle = "#2a2a2a"; ctx.fillRect(5.5*s, 0.5*s, 1.8*s, 1.2*s);   // open mouth
+    // tail (rounded)
+    ctx.fillStyle = bodyColor;
+    ctx.beginPath(); ctx.moveTo(-6*s, 0); ctx.lineTo(-9*s, -3.5*s); ctx.lineTo(-9*s, 3.5*s); ctx.closePath(); ctx.fill();
+    // long dorsal fin
+    ctx.fillStyle = finColor; ctx.fillRect(-3*s, -5.5*s, 7*s, 1.5*s);
+    ctx.beginPath(); ctx.moveTo(-1*s, 3*s); ctx.lineTo(1*s, 6*s); ctx.lineTo(2*s, 3*s); ctx.closePath(); ctx.fill();
+    // blotchy pattern
+    ctx.fillStyle = finColor;
+    ctx.fillRect(-3*s,-1*s,1.5*s,1.5*s); ctx.fillRect(0,1*s,1.5*s,1.5*s); ctx.fillRect(1*s,-2*s,1.5*s,1.5*s);
+    // eye
+    ctx.fillStyle = "#fff"; ctx.fillRect(3*s, -2*s, 1.4*s, 1.4*s);
+    ctx.fillStyle = "#000"; ctx.fillRect(3.4*s, -1.6*s, 0.7*s, 0.7*s);
+    ctx.restore();
+  }
+
+  // Arapaima: very long armored body, fins set far back, fan tail
+  function drawArapaimaSprite(cx, cy, scale, bodyColor, finColor, dir) {
+    const s = scale, d = dir || 1;
+    ctx.save(); ctx.translate(cx, cy); ctx.scale(d, 1);
+    ctx.fillStyle = bodyColor;
+    // long thick body
+    ctx.beginPath();
+    ctx.moveTo(-8*s, 0); ctx.quadraticCurveTo(-2*s, -3.5*s, 6*s, -2*s);
+    ctx.lineTo(8*s, 0); ctx.quadraticCurveTo(6*s, 2*s, 4*s, 2.5*s);
+    ctx.quadraticCurveTo(-2*s, 3.5*s, -8*s, 0); ctx.closePath(); ctx.fill();
+    // dorsal & anal fins set far back near tail
+    ctx.fillStyle = finColor;
+    ctx.fillRect(-7*s, -3.5*s, 4*s, 1.2*s); ctx.fillRect(-7*s, 2.3*s, 4*s, 1.2*s);
+    // big rounded fan tail
+    ctx.beginPath(); ctx.moveTo(-8*s, 0); ctx.lineTo(-12*s, -4*s); ctx.lineTo(-11*s, 0); ctx.lineTo(-12*s, 4*s); ctx.closePath(); ctx.fill();
+    // reddish tail markings (arapaima's signature)
+    ctx.fillStyle = "#c0503a"; ctx.fillRect(-9*s, -3*s, 2*s, 6*s);
+    // armored scale pattern
+    ctx.fillStyle = finColor;
+    for (let i=-5;i<=4;i+=3){ ctx.fillRect(i*s, -1*s, 1*s, 1*s); ctx.fillRect(i*s+1.5*s, 0.5*s, 1*s, 1*s); }
+    // eye
+    ctx.fillStyle = "#fff"; ctx.fillRect(5*s, -1.5*s, 1.2*s, 1.2*s);
+    ctx.fillStyle = "#000"; ctx.fillRect(5.3*s, -1.1*s, 0.7*s, 0.7*s);
+    ctx.restore();
+  }
+
+  // Herring/sardine: small slim silvery body, single small dorsal fin
+  function drawHerringSprite(cx, cy, scale, bodyColor, finColor, dir) {
+    const s = scale, d = dir || 1;
+    ctx.save(); ctx.translate(cx, cy); ctx.scale(d, 1);
+    ctx.fillStyle = bodyColor;
+    // slim streamlined body
+    ctx.beginPath(); ctx.ellipse(0, 0, 6*s, 2.5*s, 0, 0, Math.PI*2); ctx.fill();
+    // forked tail
+    ctx.beginPath(); ctx.moveTo(-5*s, 0); ctx.lineTo(-8*s, -2.5*s); ctx.lineTo(-6.5*s, 0); ctx.lineTo(-8*s, 2.5*s); ctx.closePath(); ctx.fill();
+    // single small dorsal fin
+    ctx.fillStyle = finColor;
+    ctx.beginPath(); ctx.moveTo(-1*s, -2*s); ctx.lineTo(0, -3.5*s); ctx.lineTo(1*s, -2*s); ctx.closePath(); ctx.fill();
+    // shiny silver belly line
+    ctx.fillStyle = "#f0f4f6"; ctx.fillRect(-4*s, 0.6*s, 8*s, 0.8*s);
+    // blue-green back
+    ctx.fillStyle = finColor; ctx.fillRect(-4*s, -1.6*s, 8*s, 0.8*s);
+    // eye
+    ctx.fillStyle = "#fff"; ctx.fillRect(3*s, -0.8*s, 1.1*s, 1.1*s);
+    ctx.fillStyle = "#000"; ctx.fillRect(3.3*s, -0.5*s, 0.6*s, 0.6*s);
+    ctx.restore();
+  }
+
+  // Jack/Carango: tall laterally-compressed body, deeply forked tail, scutes
+  function drawJackSprite(cx, cy, scale, bodyColor, finColor, dir) {
+    const s = scale, d = dir || 1;
+    ctx.save(); ctx.translate(cx, cy); ctx.scale(d, 1);
+    ctx.fillStyle = bodyColor;
+    // tall diamond-ish body
+    ctx.beginPath();
+    ctx.moveTo(5*s, 0); ctx.quadraticCurveTo(1*s, -5.5*s, -3*s, -1.5*s);
+    ctx.quadraticCurveTo(-4*s, 0, -3*s, 1.5*s);
+    ctx.quadraticCurveTo(1*s, 5.5*s, 5*s, 0);
+    ctx.closePath(); ctx.fill();
+    // pointed snout
+    ctx.fillRect(4*s, -1*s, 2*s, 2*s);
+    // deeply forked tail
+    ctx.beginPath(); ctx.moveTo(-3*s, 0); ctx.lineTo(-9*s, -5*s); ctx.lineTo(-6*s, 0); ctx.lineTo(-9*s, 5*s); ctx.closePath(); ctx.fill();
+    // dorsal & anal fins
+    ctx.fillStyle = finColor;
+    ctx.beginPath(); ctx.moveTo(-1*s,-5*s); ctx.lineTo(1*s,-6.5*s); ctx.lineTo(2*s,-4*s); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(-1*s,5*s); ctx.lineTo(1*s,6.5*s); ctx.lineTo(2*s,4*s); ctx.closePath(); ctx.fill();
+    // scutes along the tail base (jack signature)
+    ctx.fillStyle = finColor; ctx.fillRect(-4*s, -0.5*s, 3*s, 1*s);
+    // silver belly
+    ctx.fillStyle = "#eef2f4"; ctx.fillRect(-2*s, 1.5*s, 6*s, 1*s);
+    // eye
+    ctx.fillStyle = "#fff"; ctx.fillRect(3*s, -1.5*s, 1.3*s, 1.3*s);
+    ctx.fillStyle = "#000"; ctx.fillRect(3.3*s, -1.1*s, 0.7*s, 0.7*s);
+    ctx.restore();
+  }
+
+  // Snapper/Dentice: classic profile with a sloped forehead and pointed snout
+  function drawSnapperSprite(cx, cy, scale, bodyColor, finColor, dir) {
+    const s = scale, d = dir || 1;
+    ctx.save(); ctx.translate(cx, cy); ctx.scale(d, 1);
+    ctx.fillStyle = bodyColor;
+    // oval body with a sloped head
+    ctx.beginPath();
+    ctx.moveTo(6*s, -0.5*s);            // snout
+    ctx.lineTo(3*s, -4*s);              // sloped forehead
+    ctx.quadraticCurveTo(-3*s, -4*s, -6*s, 0);
+    ctx.quadraticCurveTo(-3*s, 4*s, 3*s, 3*s);
+    ctx.lineTo(6*s, 1*s);
+    ctx.closePath(); ctx.fill();
+    // forked tail
+    ctx.beginPath(); ctx.moveTo(-6*s, 0); ctx.lineTo(-9*s, -3*s); ctx.lineTo(-7*s, 0); ctx.lineTo(-9*s, 3*s); ctx.closePath(); ctx.fill();
+    // continuous dorsal fin
+    ctx.fillStyle = finColor; ctx.fillRect(-3*s, -5*s, 6*s, 1.3*s);
+    // anal fin + pectoral
+    ctx.beginPath(); ctx.moveTo(0,3*s); ctx.lineTo(2*s,5.5*s); ctx.lineTo(3*s,3*s); ctx.closePath(); ctx.fill();
+    // mouth line
+    ctx.strokeStyle = finColor; ctx.lineWidth = Math.max(1,s*0.4);
+    ctx.beginPath(); ctx.moveTo(6*s, 0.3*s); ctx.lineTo(4*s, 1*s); ctx.stroke();
+    // eye
+    ctx.fillStyle = "#fff"; ctx.fillRect(3*s, -1.5*s, 1.3*s, 1.3*s);
+    ctx.fillStyle = "#000"; ctx.fillRect(3.3*s, -1.1*s, 0.7*s, 0.7*s);
+    ctx.restore();
+  }
+
+  // Mahi-Mahi: tall squared-off forehead, long dorsal fin, forked tail
+  function drawMahiSprite(cx, cy, scale, bodyColor, finColor, dir) {
+    const s = scale, d = dir || 1;
+    ctx.save(); ctx.translate(cx, cy); ctx.scale(d, 1);
+    ctx.fillStyle = bodyColor;
+    // body tapering to tail, with a tall blunt head
+    ctx.beginPath();
+    ctx.moveTo(6*s, -4*s);              // high squared forehead
+    ctx.lineTo(6*s, 1*s);
+    ctx.quadraticCurveTo(0, 4*s, -6*s, 0.5*s);
+    ctx.quadraticCurveTo(0, -3*s, 5*s, -4*s);
+    ctx.closePath(); ctx.fill();
+    // blunt snout
+    ctx.fillRect(6*s, -1*s, 1.5*s, 2*s);
+    // long dorsal fin running the whole back
+    ctx.fillStyle = finColor;
+    ctx.beginPath();
+    ctx.moveTo(5*s, -4*s); ctx.quadraticCurveTo(-1*s, -7*s, -5*s, -1*s);
+    ctx.lineTo(-4*s, -0.5*s); ctx.quadraticCurveTo(-1*s, -4*s, 5*s, -3*s);
+    ctx.closePath(); ctx.fill();
+    // deeply forked tail
+    ctx.fillStyle = bodyColor;
+    ctx.beginPath(); ctx.moveTo(-6*s, 0); ctx.lineTo(-10*s, -4*s); ctx.lineTo(-7.5*s, 0); ctx.lineTo(-10*s, 4*s); ctx.closePath(); ctx.fill();
+    // bright spots
+    ctx.fillStyle = "#ffe14d"; ctx.fillRect(-1*s, 0, 1*s, 1*s); ctx.fillRect(1*s, -1*s, 1*s, 1*s); ctx.fillRect(2*s, 1*s, 1*s, 1*s);
+    // eye
+    ctx.fillStyle = "#fff"; ctx.fillRect(4*s, -2*s, 1.3*s, 1.3*s);
+    ctx.fillStyle = "#000"; ctx.fillRect(4.3*s, -1.6*s, 0.7*s, 0.7*s);
+    ctx.restore();
+  }
+
+  // Tarpon: large bright silver scales, upturned lower jaw, forked tail
+  function drawTarponSprite(cx, cy, scale, bodyColor, finColor, dir) {
+    const s = scale, d = dir || 1;
+    ctx.save(); ctx.translate(cx, cy); ctx.scale(d, 1);
+    ctx.fillStyle = bodyColor;
+    // elongated silvery body
+    ctx.beginPath(); ctx.ellipse(0, 0, 7*s, 3.5*s, 0, 0, Math.PI*2); ctx.fill();
+    // upturned lower jaw
+    ctx.fillRect(5*s, -1*s, 2.5*s, 1.5*s);
+    ctx.beginPath(); ctx.moveTo(6*s, 0.5*s); ctx.lineTo(7.5*s, -1.5*s); ctx.lineTo(6*s, -1*s); ctx.closePath(); ctx.fill();
+    // forked tail
+    ctx.beginPath(); ctx.moveTo(-7*s, 0); ctx.lineTo(-10*s, -4*s); ctx.lineTo(-8*s, 0); ctx.lineTo(-10*s, 4*s); ctx.closePath(); ctx.fill();
+    // trailing dorsal ray filament (tarpon signature)
+    ctx.fillStyle = finColor;
+    ctx.beginPath(); ctx.moveTo(-1*s,-3.5*s); ctx.lineTo(-4*s,-6*s); ctx.lineTo(0,-3*s); ctx.closePath(); ctx.fill();
+    // big shiny silver scales
+    ctx.fillStyle = "#f2f6f8";
+    for (let i=-4;i<=3;i++) for (let j=-1;j<=1;j++) ctx.fillRect(i*1.6*s, j*1.6*s, 1.2*s, 1.2*s);
+    // eye
+    ctx.fillStyle = "#fff"; ctx.fillRect(4*s, -1.2*s, 1.4*s, 1.4*s);
+    ctx.fillStyle = "#000"; ctx.fillRect(4.4*s, -0.8*s, 0.8*s, 0.8*s);
+    ctx.restore();
+  }
+
+  // Pixel-art shrimp/krill (curved segmented body, legs, antennae)
+  function drawShrimpSprite(cx, cy, scale, bodyColor, finColor, dir) {
+    const s = scale, d = dir || 1;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(d, 1);
+    ctx.fillStyle = bodyColor;
+    ctx.fillRect(-5*s, -1*s, 8*s, 3*s);
+    ctx.fillRect(-6*s, 0, 3*s, 3*s);
+    ctx.fillRect(3*s, -2*s, 3*s, 3*s);
+    ctx.fillStyle = finColor;
+    for (let i = -4; i <= 1; i += 2) ctx.fillRect(i*s, -1*s, 0.6*s, 3*s);
+    ctx.fillRect(-7*s, -1*s, 1*s, 4*s);
+    ctx.fillStyle = bodyColor;
+    for (let i = -4; i <= 2; i += 2) ctx.fillRect(i*s, 2*s, 1*s, 2*s);
+    ctx.strokeStyle = finColor; ctx.lineWidth = Math.max(1, s*0.5);
+    ctx.beginPath(); ctx.moveTo(5*s, -1*s); ctx.lineTo(9*s, -3*s); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(5*s, 0); ctx.lineTo(9*s, 0); ctx.stroke();
+    ctx.fillStyle = "#000"; ctx.fillRect(4*s, -1*s, 1*s, 1*s);
+    ctx.restore();
+  }
+
+  // Pixel-art leopard seal (sleek body, flippers, spots)
+  function drawSealSprite(cx, cy, scale, bodyColor, dir) {
+    const s = scale, d = dir || 1;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(d, 1);
+    ctx.fillStyle = bodyColor;
+    ctx.beginPath(); ctx.ellipse(0, 0, 7*s, 3.5*s, 0, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(6*s, -1*s, 3*s, 2.5*s, 0, 0, Math.PI*2); ctx.fill();
+    ctx.fillRect(-9*s, -2*s, 2*s, 2*s); ctx.fillRect(-9*s, 1*s, 2*s, 2*s);
+    ctx.fillStyle = "#6a7078"; ctx.fillRect(1*s, 2*s, 4*s, 2*s);
+    ctx.fillStyle = "#5a6068";
+    ctx.fillRect(-3*s, -1*s, 1*s, 1*s); ctx.fillRect(0, 1*s, 1*s, 1*s); ctx.fillRect(2*s, -2*s, 1*s, 1*s);
+    ctx.fillStyle = "#c8ccd0"; ctx.fillRect(-4*s, 2*s, 8*s, 1*s);
+    ctx.fillStyle = "#000"; ctx.fillRect(7*s, -1*s, 1*s, 1*s);
+    ctx.restore();
+  }
+
+  // Pixel-art orca (killer whale): black body, white belly + eye patch, tall dorsal fin
+  function drawOrcaSprite(cx, cy, scale, dir) {
+    const s = scale, d = dir || 1;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(d, 1);
+    // body (black)
+    ctx.fillStyle = "#141418";
+    ctx.fillRect(-6*s, -2*s, 12*s, 5*s);
+    ctx.fillRect(-5*s, -3*s, 9*s, 7*s);
+    // tail flukes
+    ctx.fillRect(-8*s, -3*s, 2*s, 2*s);
+    ctx.fillRect(-8*s, 2*s, 2*s, 2*s);
+    ctx.fillRect(-7*s, -1*s, 1*s, 3*s);
+    // dorsal fin (tall)
+    ctx.beginPath();
+    ctx.moveTo(-1*s, -3*s); ctx.lineTo(0, -7*s); ctx.lineTo(2*s, -3*s); ctx.closePath(); ctx.fill();
+    // pectoral fin
+    ctx.fillRect(0, 2*s, 3*s, 2*s);
+    // white belly patch
+    ctx.fillStyle = "#f4f4f8";
+    ctx.fillRect(-3*s, 1*s, 7*s, 2*s);
+    // white eye patch
+    ctx.fillRect(2*s, -2*s, 2*s, 1.6*s);
+    // eye
+    ctx.fillStyle = "#000000"; ctx.fillRect(3*s, -1.6*s, 0.9*s, 0.9*s);
+    ctx.restore();
   }
 
   // Pixel-art squid sprite (mantle + head + wavy tentacles)
@@ -1685,12 +2438,12 @@
     ctx.beginPath(); ctx.moveTo(x+2, 30); ctx.lineTo(lineX, 66); ctx.stroke();
     const wig = Math.sin(frame*0.3) * 3;
     const cf = landedFish || { color:"#5aa0d8", fin:"#3f7fb8", size:1, name:"Pesce" };
-    const fscale = 2.0 + (cf.size ? (cf.size - 1) * 0.8 : 0);
-    if (cf.species && cf.species.crab) {
-      drawCrabSprite(lineX + wig, 74, fscale, cf.color, cf.fin);   // crab hangs upright
-    } else if (cf.species && cf.species.squid) {
-      drawSquidSprite(lineX + wig, 72, fscale, cf.color, cf.fin, 1);
+    const fscale = (2.0 + (cf.size ? (cf.size - 1) * 0.8 : 0)) * (cf.tierScale || 1);
+    const sp = cf.species;
+    if (sp && (sp.crab || sp.squid || sp.orca || sp.krill || sp.seal || sp.shape)) {
+      drawCreature(sp, lineX + wig, 74, fscale, 1);
     } else {
+      // regular fish hangs head-up on the line
       drawFishSprite(lineX + wig, 76, fscale, cf.color, cf.fin, 1, true);
     }
 
@@ -1828,12 +2581,8 @@
         // crabs scuttle along the bottom
         fy = ty + th - 12;
         fx = tx + 12 + ((i * 41 + frame*0.3) % (tw - 24));
-        drawCrabSprite(fx, fy, 1.5, col, fin);
-      } else if (fish.squid) {
-        drawSquidSprite(fx, fy, 1.5, col, fin, dir);
-      } else {
-        drawFishSprite(fx, fy, 1.6, col, fin, dir);
       }
+      drawCreature(fish, fx, fy, (fish.crab?1.5:1.6) * (fish.tierScale || 1), dir);
       if (i === aqIndex) { selX = fx; selY = fy; }
     });
 
@@ -1986,15 +2735,15 @@
         const cx = px + 16 + j * 26;
         const cy = rowY + 18;
         const isCaught = !!caught[currentLocation + ":" + sp.name];
-        if (sp.crab) {
-          if (isCaught) drawCrabSprite(cx, cy, 1.1, sp.color, sp.fin);
-          else { drawCrabSprite(cx, cy, 1.1, "#0d2244", "#0d2244"); text("?", cx-2, cy-3, "#4a6a9a"); }
-        } else if (sp.squid) {
-          if (isCaught) drawSquidSprite(cx, cy, 1.1, sp.color, sp.fin, 1);
-          else { drawSquidSprite(cx, cy, 1.1, "#0d2244", "#0d2244", 1); text("?", cx-2, cy-3, "#4a6a9a"); }
+        // gentle per-tier scaling so the grid stays readable
+        const ts = TIERS[row.tier].sizeScale;
+        const gScale = 0.9 + (ts - 0.75) * 0.5;   // ~0.9 (F1) .. ~1.4 (F4)
+        if (isCaught) {
+          drawCreature(sp, cx, cy, gScale, 1);
         } else {
-          if (isCaught) drawFishSprite(cx, cy, 1.2, sp.color, sp.fin, 1);
-          else { drawFishSprite(cx, cy, 1.2, "#0d2244", "#0d2244", 1); text("?", cx-2, cy-3, "#4a6a9a"); }
+          const dark = Object.assign({}, sp, { color:"#0d2244", fin:"#0d2244", ghost:false });
+          drawCreature(dark, cx, cy, gScale, 1);
+          text("?", cx-2, cy-3, "#4a6a9a");
         }
         if (ri === collRow && j === collCol) selInfo = { cx, cy, sp, isCaught };
       });
@@ -2394,13 +3143,79 @@
       ctx.fillStyle="#2e5a2e"; ctx.fillRect(x, hz-2, w, 3);
       // estuary water
       g = ctx.createLinearGradient(0,hz,0,y+h);
-      g.addColorStop(0,"#5fb8a8"); g.addColorStop(1,"#265f5a");
+      g.addColorStop(0,"#6fd8c0"); g.addColorStop(1,"#237a72");
       ctx.fillStyle=g; ctx.fillRect(x,hz,w,y+h-hz);
       // stilt hut
       ctx.fillStyle="#a07850"; ctx.fillRect(x+8, hz+4, 6, 4);
       ctx.fillStyle="#c8a860"; ctx.beginPath(); ctx.moveTo(x+7,hz+4); ctx.lineTo(x+11,hz+1); ctx.lineTo(x+15,hz+4); ctx.closePath(); ctx.fill();
       ctx.fillStyle="#3a2a1a"; ctx.fillRect(x+9, hz+8, 1, 4); ctx.fillRect(x+13, hz+8, 1, 4);
       drawFishSprite(x+w*0.55 + Math.sin(frame*0.05)*8, y+h-14, 1.6, "#c8c060", "#9a9040", 1);
+
+    } else if (loc.background === "patagonia") {
+      // dramatic cold sky
+      let g = ctx.createLinearGradient(0,y,0,hz);
+      g.addColorStop(0,"#6a7f92"); g.addColorStop(0.6,"#9fb2bf"); g.addColorStop(1,"#cbd6da");
+      ctx.fillStyle=g; ctx.fillRect(x,y,w,hz-y);
+      // jagged snowy peaks
+      ctx.fillStyle="#5a6672";
+      ctx.beginPath();
+      ctx.moveTo(x, hz); ctx.lineTo(x+w*0.15, hz-18); ctx.lineTo(x+w*0.3, hz-8);
+      ctx.lineTo(x+w*0.5, hz-20); ctx.lineTo(x+w*0.7, hz-10); ctx.lineTo(x+w*0.85, hz-18);
+      ctx.lineTo(x+w, hz-8); ctx.lineTo(x+w, hz); ctx.closePath(); ctx.fill();
+      ctx.fillStyle="#eef4f6";
+      ctx.beginPath(); ctx.moveTo(x+w*0.5,hz-20); ctx.lineTo(x+w*0.45,hz-13); ctx.lineTo(x+w*0.55,hz-13); ctx.closePath(); ctx.fill();
+      ctx.fillStyle="#2f363c"; ctx.fillRect(x, hz-2, w, 3);
+      // cold sea
+      g = ctx.createLinearGradient(0,hz,0,y+h);
+      g.addColorStop(0,"#6a92a0"); g.addColorStop(1,"#2a4756");
+      ctx.fillStyle=g; ctx.fillRect(x,hz,w,y+h-hz);
+      // lighthouse
+      for (let i=0;i<3;i++){ ctx.fillStyle=(i%2===0)?"#d84030":"#f0ece0"; ctx.fillRect(x+w-14, hz-9+i*3, 4, 3); }
+      ctx.fillStyle="#ffe14d"; ctx.fillRect(x+w-13, hz-11, 2, 1);
+      drawFishSprite(x+w*0.5 + Math.sin(frame*0.05)*8, y+h-14, 1.6, "#9aa8b0", "#7a8890", 1);
+
+    } else if (loc.background === "antille") {
+      // bright Caribbean sky
+      let g = ctx.createLinearGradient(0,y,0,hz);
+      g.addColorStop(0,"#2f9ee0"); g.addColorStop(0.6,"#8fd6ee"); g.addColorStop(1,"#d8f4f2");
+      ctx.fillStyle=g; ctx.fillRect(x,y,w,hz-y);
+      ctx.fillStyle="#fff3b0"; ctx.beginPath(); ctx.arc(x+10, y+8, 4,0,Math.PI*2); ctx.fill();
+      // white-sand atolls with bent palms
+      ctx.fillStyle="#f4eed0";
+      ctx.beginPath(); ctx.ellipse(x+w*0.3, hz-1, 10, 3, 0, Math.PI, 0); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(x+w*0.7, hz-1, 8, 2, 0, Math.PI, 0); ctx.fill();
+      ctx.strokeStyle="#8a6a3a"; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(x+w*0.3, hz-1); ctx.quadraticCurveTo(x+w*0.3+2, hz-7, x+w*0.3+5, hz-9); ctx.stroke();
+      ctx.strokeStyle="#2e8b4a"; ctx.beginPath(); ctx.moveTo(x+w*0.3+5, hz-9); ctx.lineTo(x+w*0.3+11, hz-8); ctx.stroke();
+      ctx.fillStyle="#e0d4a8"; ctx.fillRect(x, hz-2, w, 2);
+      // turquoise transparent water
+      g = ctx.createLinearGradient(0,hz,0,y+h);
+      g.addColorStop(0,"#9ff0e8"); g.addColorStop(1,"#2fa8c8");
+      ctx.fillStyle=g; ctx.fillRect(x,hz,w,y+h-hz);
+      // coral patches + wreck hint
+      ["#e07aa0","#e0a040","#40b0a0"].forEach((c,i)=>{ ctx.fillStyle=c; ctx.globalAlpha=0.5; ctx.fillRect(x+10+i*14, hz+5+(i%2)*4, 3, 3); ctx.globalAlpha=1; });
+      ctx.fillStyle="#5a4630"; ctx.fillRect(x+w*0.7, hz+10, 10, 3);
+      drawFishSprite(x+w*0.5 + Math.sin(frame*0.05)*8, y+h-14, 1.6, "#e0c050", "#e05a5a", 1);
+
+    } else if (loc.background === "ross") {
+      // pale Antarctic sky
+      let g = ctx.createLinearGradient(0,y,0,hz);
+      g.addColorStop(0,"#9fc0d8"); g.addColorStop(0.6,"#d0e4ee"); g.addColorStop(1,"#eef6fa");
+      ctx.fillStyle=g; ctx.fillRect(x,y,w,hz-y);
+      // ice shelf wall
+      ctx.fillStyle="#eaf2f6"; ctx.fillRect(x, hz-10, w, 8);
+      ctx.fillStyle="#a8d0e4"; ctx.fillRect(x, hz-3, w, 2);
+      // black crystalline sea
+      g = ctx.createLinearGradient(0,hz,0,y+h);
+      g.addColorStop(0,"#2a4658"); g.addColorStop(1,"#0a1a24");
+      ctx.fillStyle=g; ctx.fillRect(x,hz,w,y+h-hz);
+      // cobalt iceberg
+      ctx.fillStyle="#4a80c0";
+      ctx.beginPath(); ctx.moveTo(x+w*0.6, hz+8); ctx.lineTo(x+w*0.68, hz); ctx.lineTo(x+w*0.78, hz+8); ctx.closePath(); ctx.fill();
+      ctx.fillStyle="#cfe4f2"; ctx.beginPath(); ctx.moveTo(x+w*0.68,hz); ctx.lineTo(x+w*0.78,hz+8); ctx.lineTo(x+w*0.72,hz+8); ctx.closePath(); ctx.fill();
+      // penguin
+      drawPenguin(x+w*0.3, hz-1);
+      drawFishSprite(x+w*0.45 + Math.sin(frame*0.05)*6, y+h-13, 1.4, "#9aa8b0", "#7a8890", 1);
 
     } else {
       ctx.fillStyle="#2a6ec2"; ctx.fillRect(x,y,w,h);
@@ -2538,6 +3353,9 @@
     if (loc.background === "kamchatka") return drawKamchatkaScene();
     if (loc.background === "fuji") return drawFujiScene();
     if (loc.background === "bijagos") return drawBijagosScene();
+    if (loc.background === "patagonia") return drawPatagoniaScene();
+    if (loc.background === "antille") return drawAntilleScene();
+    if (loc.background === "ross") return drawRossScene();
     ctx.fillStyle = "#7fae6a"; ctx.fillRect(0, HORIZON-4, W, 4);
     ctx.fillStyle = "#5f8f4e"; ctx.fillRect(0, HORIZON-2, W, 2);
   }
@@ -3067,49 +3885,79 @@
   function drawBijagosScene() {
     const base = HORIZON;
 
-    // sandy islands on the horizon: alternating red and white sand
+    // birds in the warm sky
+    ctx.fillStyle = "#6a7a6a";
+    [[24,12],[34,15],[110,10]].forEach(([bx,by])=>{ ctx.fillRect(bx,by,1,1); ctx.fillRect(bx+1,by-1,1,1); ctx.fillRect(bx+2,by,1,1); });
+
+    // far hazy islands on the very horizon (varied)
+    ctx.fillStyle = "rgba(150,180,150,0.6)";
+    [[30,20],[86,28],[140,22]].forEach(([ix,iw])=>{ ctx.beginPath(); ctx.ellipse(ix, base-4, iw/2, 3, 0, Math.PI, 0); ctx.fill(); });
+
+    // sandy islands on the shore: alternating red and white sand, with palms
     const islands = [[16,18,"#e0a878","#c88858"],[52,14,"#f0e6cc","#d8c8a0"],
-                     [92,20,"#d89868","#b87848"],[130,16,"#f2e8d0","#dccca8"]];
+                     [92,22,"#d89868","#b87848"],[132,16,"#f2e8d0","#dccca8"]];
     islands.forEach(([ix,iw,top,bot])=>{
       ctx.fillStyle = bot; ctx.beginPath(); ctx.ellipse(ix, base-1, iw/2, 4, 0, Math.PI, 0); ctx.fill();
       ctx.fillStyle = top; ctx.beginPath(); ctx.ellipse(ix, base-2, iw/2-1, 3, 0, Math.PI, 0); ctx.fill();
     });
+    // palms on the shore islands
+    [16,52,92,132].forEach((px,i)=>{ if (i%2===0) drawPalm(px, base-2); });
 
-    // dense mangroves (green clumps with tangled roots) along the shore
+    // dense mangroves (green clumps with tangled roots) between the islands
     ctx.fillStyle = "#2e5a2e";
-    for (let x = 0; x < W; x += 8) {
-      const h = 8 + ((x*7) % 6);
-      ctx.beginPath(); ctx.arc(x+4, base-3, h/1.6, Math.PI, 0); ctx.fill();
+    for (let x = 0; x < W; x += 9) {
+      const h = 7 + ((x*7) % 6);
+      ctx.beginPath(); ctx.arc(x+4, base-3, h/1.7, Math.PI, 0); ctx.fill();
     }
     ctx.fillStyle = "#24481f";
-    for (let x = 4; x < W; x += 16) {
-      ctx.beginPath(); ctx.arc(x+2, base-6, 5, 0, Math.PI*2); ctx.fill();
-    }
+    for (let x = 4; x < W; x += 18) { ctx.beginPath(); ctx.arc(x+2, base-6, 5, 0, Math.PI*2); ctx.fill(); }
     // mangrove roots dipping into the water
     ctx.strokeStyle = "#3a2a1a"; ctx.lineWidth = 1;
     for (let i = 0; i < 14; i++) {
       const rx = (i*12 + 4) % W;
-      ctx.beginPath();
-      ctx.moveTo(rx, base-3);
-      ctx.lineTo(rx-1, base+2); ctx.lineTo(rx+1, base+2);
-      ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(rx, base-3); ctx.lineTo(rx-1, base+2); ctx.lineTo(rx+1, base+2); ctx.stroke();
     }
-    // green base band
     ctx.fillStyle = "#2e5a2e"; ctx.fillRect(0, base-3, W, 3);
 
     // stilt village huts over the water (left)
-    drawStiltHut(30, base+10);
-    drawStiltHut(44, base+13);
+    drawStiltHut(30, base+9);
+    drawStiltHut(44, base+12);
+  }
 
-    // a dugout pirogue on the water (right)
-    drawCanoe(112 + Math.sin(frame*0.02)*2, base+16);
+  // Small palm tree
+  function drawPalm(x, baseY) {
+    ctx.fillStyle = "#6a4a2a"; ctx.fillRect(x, baseY-8, 1, 8);
+    ctx.fillStyle = "#3a8a4a";
+    ctx.fillRect(x-4, baseY-9, 4, 1); ctx.fillRect(x+1, baseY-9, 4, 1);
+    ctx.fillRect(x-3, baseY-10, 3, 1); ctx.fillRect(x+1, baseY-10, 3, 1);
+    ctx.fillRect(x, baseY-11, 1, 1);
+  }
 
-    // shimmering tidal reflections
-    ctx.fillStyle = "rgba(255,240,200,0.18)";
-    for (let i = 0; i < 6; i++) {
-      const gx = (i*28 + Math.floor(frame*0.3)) % W;
-      ctx.fillRect(gx, base + 4, 5, 1);
-    }
+  // Islands scattered out in the open sea (drawn after the water, with depth)
+  function drawBijagosSeaIslands() {
+    // 3 islands, spread out; some cut off by the frame edges. less "perfect"
+    // [x, yBelowHorizon, width, sandTop, sandBot, palm]
+    const seaIsl = [
+      [-6,  16, 34, "#e6b088", "#c88858", true],   // cut off on the left edge
+      [96,  10, 20, "#f0e6cc", "#d8c8a0", true],
+      [150, 26, 40, "#e0a878", "#c88858", false]    // cut off on the right edge
+    ];
+    seaIsl.forEach(([ix, dy, iw, top, bot, palm])=>{
+      const iy = HORIZON + dy;
+      // subtle shallow-water tint (not a bright ring)
+      ctx.fillStyle = "rgba(150,225,205,0.28)";
+      ctx.beginPath(); ctx.ellipse(ix, iy+2, iw/2+4, 5, 0, 0, Math.PI*2); ctx.fill();
+      // sand base (slightly irregular via two overlapping ellipses)
+      ctx.fillStyle = bot;
+      ctx.beginPath(); ctx.ellipse(ix, iy, iw/2, 4, 0, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(ix + iw*0.18, iy+1, iw/3, 3, 0, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = top;
+      ctx.beginPath(); ctx.ellipse(ix - iw*0.1, iy-1, iw/2-3, 3, 0, 0, Math.PI*2); ctx.fill();
+      // low green vegetation
+      ctx.fillStyle = "#3a7a3a";
+      ctx.beginPath(); ctx.ellipse(ix, iy-2, iw/3.5, 2, 0, 0, Math.PI*2); ctx.fill();
+      if (palm) { drawPalm(ix - 2, iy-2); drawPalm(ix + 4, iy-1); }
+    });
   }
 
   // Thatched hut on wooden stilts over the water
@@ -3129,6 +3977,267 @@
     ctx.fillStyle = "#3a2a1a"; ctx.fillRect(x+4, bodyY+3, 2, 4);
     // reflection
     ctx.fillStyle = "rgba(160,120,80,0.3)"; ctx.fillRect(x, waterY, 10, 2);
+  }
+
+  // Patagonia: jagged snowy peaks & glaciers diving into the sea, lighthouse,
+  // flag-tree bent by the wind, penguins on the rocks.
+  function drawPatagoniaScene() {
+    const base = HORIZON;
+
+    // Cordillera Darwin: sharp snowy peaks along the horizon (two layers)
+    ctx.fillStyle = "#5a6672";  // far range
+    ctx.beginPath();
+    ctx.moveTo(0, base);
+    ctx.lineTo(16, base-24); ctx.lineTo(30, base-12);
+    ctx.lineTo(48, base-28); ctx.lineTo(66, base-14);
+    ctx.lineTo(84, base-26); ctx.lineTo(104, base-16);
+    ctx.lineTo(124, base-30); ctx.lineTo(146, base-18);
+    ctx.lineTo(160, base-24); ctx.lineTo(160, base);
+    ctx.closePath(); ctx.fill();
+    // snow caps
+    ctx.fillStyle = "#eef4f6";
+    [[16,24],[48,28],[84,26],[124,30]].forEach(([px,ph])=>{
+      ctx.beginPath(); ctx.moveTo(px, base-ph); ctx.lineTo(px-6, base-ph+9); ctx.lineTo(px+6, base-ph+9); ctx.closePath(); ctx.fill();
+    });
+    // glacier tongues flowing to the water (bluish white)
+    ctx.fillStyle = "#cfe4ee";
+    ctx.fillRect(44, base-14, 8, 14);
+    ctx.fillRect(120, base-16, 7, 16);
+    // near dark rocky cliffs
+    ctx.fillStyle = "#54606a";
+    ctx.beginPath();
+    ctx.moveTo(0, base); ctx.lineTo(12, base-8); ctx.lineTo(26, base-3); ctx.lineTo(40, base-7); ctx.lineTo(40, base);
+    ctx.closePath(); ctx.fill();
+    // rocky shoreline
+    ctx.fillStyle = "#454e58"; ctx.fillRect(0, base-2, W, 3);
+
+    // Faro Les Eclaireurs (lighthouse) on a rock, right side
+    drawLighthouse(126, base+2);
+    // flag-tree bent by the wind (left)
+    drawFlagTree(24, base+1);
+    // penguins on the shore rocks
+    drawPenguin(50, base+1); drawPenguin(58, base+1); drawPenguin(66, base+2);
+  }
+
+  // Grey/blue ice floes drifting on the Patagonian sea (drawn after the water)
+  function drawPatagoniaIce() {
+    const base = HORIZON;
+    // varied floes at different depths, grey-blue tints
+    const floes = [
+      [40,  10, 10, "#dbe8ee", "#b8cdd8"],
+      [96,  16, 14, "#c8dae4", "#9fb8c6"],
+      [70,  24, 18, "#d0e0e8", "#aac2ce"],
+      [128, 30, 22, "#c0d4de", "#94aebc"],
+      [24,  34, 20, "#d6e4ec", "#aec6d2"]
+    ];
+    floes.forEach(([ix,dy,iw,top,bot],k)=>{
+      const iy = base + dy;
+      const dx = ix + Math.sin(frame*0.015 + k)*3;
+      // underwater blue tint
+      ctx.fillStyle = "rgba(120,170,195,0.35)";
+      ctx.beginPath(); ctx.ellipse(dx, iy+2, iw/2+2, 3, 0, 0, Math.PI*2); ctx.fill();
+      // ice top (irregular chunk)
+      ctx.fillStyle = bot;
+      ctx.beginPath();
+      ctx.moveTo(dx-iw/2, iy); ctx.lineTo(dx-iw/4, iy-3); ctx.lineTo(dx+iw/5, iy-2);
+      ctx.lineTo(dx+iw/2, iy+1); ctx.lineTo(dx+iw/4, iy+3); ctx.lineTo(dx-iw/3, iy+2);
+      ctx.closePath(); ctx.fill();
+      ctx.fillStyle = top;
+      ctx.beginPath();
+      ctx.moveTo(dx-iw/3, iy-1); ctx.lineTo(dx-iw/6, iy-3); ctx.lineTo(dx+iw/6, iy-2); ctx.lineTo(dx+iw/4, iy); ctx.lineTo(dx-iw/4, iy+1);
+      ctx.closePath(); ctx.fill();
+    });
+  }
+
+  // Red-and-white lighthouse
+  function drawLighthouse(x, waterY) {
+    const topY = waterY - 16;
+    // rock base
+    ctx.fillStyle = "#3a424a"; ctx.beginPath(); ctx.ellipse(x+1, waterY, 8, 3, 0, 0, Math.PI*2); ctx.fill();
+    // tower with red/white bands
+    for (let i = 0; i < 4; i++) {
+      ctx.fillStyle = (i % 2 === 0) ? "#d84030" : "#f0ece0";
+      ctx.fillRect(x-2, topY + i*3, 5, 3);
+    }
+    // lantern room
+    ctx.fillStyle = "#2a2a30"; ctx.fillRect(x-2, topY-3, 5, 3);
+    ctx.fillStyle = "#ffe14d"; ctx.fillRect(x-1, topY-2, 3, 1);   // light
+    // reflection
+    ctx.fillStyle = "rgba(216,64,48,0.3)"; ctx.fillRect(x-2, waterY+1, 5, 2);
+  }
+
+  // Wind-bent "flag tree"
+  function drawFlagTree(x, baseY) {
+    ctx.fillStyle = "#4a3420";
+    ctx.beginPath();
+    ctx.moveTo(x, baseY); ctx.lineTo(x-1, baseY-12); ctx.lineTo(x-4, baseY-15);
+    ctx.lineTo(x-3, baseY-14); ctx.lineTo(x, baseY-11); ctx.lineTo(x+1, baseY);
+    ctx.closePath(); ctx.fill();
+    // foliage swept hard to one side (flag)
+    ctx.fillStyle = "#3a6a3a";
+    ctx.fillRect(x-12, baseY-16, 8, 2);
+    ctx.fillRect(x-10, baseY-14, 7, 2);
+    ctx.fillRect(x-8, baseY-12, 6, 2);
+  }
+
+  // Tiny penguin
+  function drawPenguin(x, baseY) {
+    ctx.fillStyle = "#20242a"; ctx.fillRect(x-2, baseY-6, 4, 6);   // back
+    ctx.fillStyle = "#f0f0f0"; ctx.fillRect(x-1, baseY-4, 2, 4);   // belly
+    ctx.fillStyle = "#20242a"; ctx.fillRect(x-2, baseY-6, 4, 2);   // head
+    ctx.fillStyle = "#e0a030"; ctx.fillRect(x-1, baseY-5, 1, 1);   // beak
+    ctx.fillStyle = "#e0a030"; ctx.fillRect(x-1, baseY, 1, 1); ctx.fillRect(x, baseY, 1, 1); // feet
+  }
+
+  // Grandi Antille (Caraibi): white-sand atolls with wind-bent coconut palms,
+  // turquoise transparent sea, reef visible at the surface, a half-sunken wreck.
+  function drawAntilleScene() {
+    const base = HORIZON;
+
+    // a few clouds
+    ctx.fillStyle = "rgba(255,255,255,0.7)";
+    [[26,10,10],[100,7,12],[140,12,8]].forEach(([cx,cy,cw])=>{
+      ctx.beginPath(); ctx.arc(cx, cy, cw/2, 0, Math.PI*2); ctx.arc(cx+cw/2, cy+1, cw/2.5, 0, Math.PI*2); ctx.fill();
+    });
+
+    // distant reef line just under the horizon (pale turquoise band)
+    ctx.fillStyle = "#bff0e8"; ctx.fillRect(0, base, W, 2);
+
+    // white-sand atolls on the horizon
+    const atolls = [[24,26],[86,20],[136,30]];
+    atolls.forEach(([ix,iw])=>{
+      ctx.fillStyle = "#d8cca8"; ctx.beginPath(); ctx.ellipse(ix, base-1, iw/2, 4, 0, Math.PI, 0); ctx.fill();
+      ctx.fillStyle = "#f4eed0"; ctx.beginPath(); ctx.ellipse(ix, base-2, iw/2-2, 3, 0, Math.PI, 0); ctx.fill();
+    });
+    // wind-bent coconut palms on the atolls
+    drawBentPalm(20, base-2); drawBentPalm(28, base-2);
+    drawBentPalm(86, base-2);
+    drawBentPalm(132, base-2); drawBentPalm(140, base-2);
+
+    // shoreline
+    ctx.fillStyle = "#e0d4a8"; ctx.fillRect(0, base-2, W, 2);
+  }
+
+  // Coconut palm bent by the wind
+  function drawBentPalm(x, baseY) {
+    ctx.strokeStyle = "#8a6a3a"; ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x, baseY);
+    ctx.quadraticCurveTo(x+2, baseY-8, x+7, baseY-11);   // trunk bends to the right
+    ctx.stroke();
+    // fronds swept downwind
+    ctx.strokeStyle = "#2e8b4a";
+    const tipX = x+7, tipY = baseY-11;
+    [[10,-2],[9,2],[6,4],[3,-4]].forEach(([dx,dy])=>{
+      ctx.beginPath(); ctx.moveTo(tipX, tipY); ctx.quadraticCurveTo(tipX+dx*0.6, tipY+dy*0.5-1, tipX+dx, tipY+dy); ctx.stroke();
+    });
+    // coconuts
+    ctx.fillStyle = "#5a3a1a"; ctx.fillRect(tipX-1, tipY, 1, 1); ctx.fillRect(tipX+1, tipY+1, 1, 1);
+  }
+
+  // Half-sunken shipwreck breaking the surface (drawn after the water)
+  function drawWreck(x, y) {
+    // slanted hull
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(-0.18);
+    ctx.fillStyle = "#5a4630";
+    ctx.fillRect(-16, 0, 32, 6);
+    ctx.fillStyle = "#3f3020"; ctx.fillRect(-16, 4, 32, 2);
+    // broken mast
+    ctx.strokeStyle = "#4a3620"; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(4, 0); ctx.lineTo(8, -14); ctx.stroke();
+    // ribs
+    ctx.strokeStyle = "#3a2c1c"; ctx.lineWidth = 1;
+    for (let i = -12; i <= 12; i += 6) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, -3); ctx.stroke(); }
+    ctx.restore();
+    // waterline foam around it
+    ctx.fillStyle = "rgba(255,255,255,0.4)"; ctx.fillRect(x-16, y+2, 34, 1);
+  }
+
+  // Reef patches, sandy shoals and a wreck seen through the clear water
+  function drawAntilleWater() {
+    // pale sandy shoals (very shallow, near-white)
+    ctx.fillStyle = "rgba(245,240,205,0.35)";
+    [[40,10,20],[110,16,26],[70,26,30]].forEach(([sx,dy,sw])=>{
+      ctx.beginPath(); ctx.ellipse(sx, HORIZON+dy, sw/2, 4, 0, 0, Math.PI*2); ctx.fill();
+    });
+    // coral patches visible at/just under the surface (colored, semi-transparent)
+    const coralCols = ["#e07aa0","#e0a040","#7a5ad0","#40b0a0","#e05a5a"];
+    for (let i = 0; i < 10; i++) {
+      const cx = 8 + i*16;
+      const cy = HORIZON + 6 + (i % 4) * 6;
+      ctx.globalAlpha = 0.45;
+      ctx.fillStyle = coralCols[i % coralCols.length];
+      ctx.fillRect(cx-2, cy, 2, 3); ctx.fillRect(cx, cy-1, 2, 4); ctx.fillRect(cx+2, cy, 2, 3);
+      ctx.globalAlpha = 1;
+    }
+    // a half-sunken wreck breaking the surface
+    drawWreck(120, HORIZON + 20);
+    // surface glitter
+    ctx.fillStyle = "rgba(255,255,255,0.35)";
+    for (let i = 0; i < 8; i++) { const gx = (i*21 + Math.floor(frame*0.3)) % W; ctx.fillRect(gx, HORIZON+3, 3, 1); }
+  }
+
+  // Mare di Ross (Antartide): ice-shelf walls, cobalt icebergs, icebreaker, penguins
+  function drawRossScene() {
+    const base = HORIZON;
+
+    // towering ice-shelf wall along the back (white with blue base)
+    ctx.fillStyle = "#eaf2f6";
+    ctx.fillRect(0, base-18, W, 16);
+    // uneven top edge
+    ctx.fillStyle = "#eaf2f6";
+    for (let x = 0; x < W; x += 8) { const h = 2 + ((x*5)%5); ctx.fillRect(x, base-18-h, 8, h); }
+    // blue shaded base of the ice wall
+    ctx.fillStyle = "#a8d0e4"; ctx.fillRect(0, base-6, W, 4);
+    ctx.fillStyle = "#7fb8d8"; ctx.fillRect(0, base-3, W, 2);
+    // vertical cracks in the ice wall
+    ctx.strokeStyle = "#c8dce8"; ctx.lineWidth = 1;
+    for (let x = 10; x < W; x += 22) { ctx.beginPath(); ctx.moveTo(x, base-18); ctx.lineTo(x+2, base-4); ctx.stroke(); }
+
+    // an icebreaker ship in the distance (left)
+    drawIcebreaker(40, base-2);
+
+    // penguins on the ice edge
+    drawPenguin(96, base-1); drawPenguin(104, base-1); drawPenguin(112, base);
+  }
+
+  // Cobalt-blue iceberg floating on the sea (drawn after the water)
+  function drawIceberg(x, y, sz) {
+    const s = sz;
+    // underwater blue glow
+    ctx.fillStyle = "rgba(60,120,190,0.35)";
+    ctx.beginPath(); ctx.ellipse(x, y+2, s*1.4, 4, 0, 0, Math.PI*2); ctx.fill();
+    // iceberg body (cobalt to white)
+    ctx.fillStyle = "#4a80c0";
+    ctx.beginPath();
+    ctx.moveTo(x-s, y+2); ctx.lineTo(x-s*0.5, y-s*0.8); ctx.lineTo(x, y-s*1.2);
+    ctx.lineTo(x+s*0.6, y-s*0.7); ctx.lineTo(x+s, y+2);
+    ctx.closePath(); ctx.fill();
+    // sunlit facets
+    ctx.fillStyle = "#cfe4f2";
+    ctx.beginPath(); ctx.moveTo(x, y-s*1.2); ctx.lineTo(x+s*0.6, y-s*0.7); ctx.lineTo(x+s*0.2, y+2); ctx.lineTo(x, y+2); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = "#8fbfe0";
+    ctx.beginPath(); ctx.moveTo(x, y-s*1.2); ctx.lineTo(x-s*0.5, y-s*0.8); ctx.lineTo(x-s*0.2, y+2); ctx.lineTo(x, y+2); ctx.closePath(); ctx.fill();
+  }
+
+  // Icebreaker ship
+  function drawIcebreaker(x, waterY) {
+    const y = waterY;
+    ctx.fillStyle = "#b03028";           // red hull
+    ctx.beginPath();
+    ctx.moveTo(x-12, y-4); ctx.lineTo(x+12, y-4); ctx.lineTo(x+9, y); ctx.lineTo(x-14, y);
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = "#141418"; ctx.fillRect(x-14, y-2, 26, 2);  // waterline stripe
+    // white superstructure
+    ctx.fillStyle = "#e8ecee"; ctx.fillRect(x-4, y-11, 10, 7);
+    ctx.fillStyle = "#c8ccce"; ctx.fillRect(x-4, y-11, 10, 1);
+    // funnel + mast
+    ctx.fillStyle = "#b03028"; ctx.fillRect(x+2, y-14, 3, 3);
+    ctx.fillStyle = "#3a3f46"; ctx.fillRect(x-6, y-16, 1, 5);
+    // windows
+    ctx.fillStyle = "#ffe14d"; ctx.fillRect(x-2, y-9, 1, 1); ctx.fillRect(x+1, y-9, 1, 1);
   }
 
   function drawDock() {
