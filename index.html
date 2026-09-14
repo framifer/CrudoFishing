@@ -3495,35 +3495,54 @@
 
   // ---------- TITLE SCREEN ----------
   function drawTitle() {
-    // sky gradient
+    // ---- nautical-chart background ----
     const g = ctx.createLinearGradient(0,0,0,H);
-    g.addColorStop(0, "#0f2a4a"); g.addColorStop(0.55, "#2a6ec2"); g.addColorStop(1, "#173f7a");
+    g.addColorStop(0, "#4f8aa8"); g.addColorStop(1, "#2f6280");
     ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
-    // sun
-    ctx.fillStyle = "#ffe08a"; ctx.beginPath(); ctx.arc(W/2, 44, 16, 0, Math.PI*2); ctx.fill();
-    // animated waves at the bottom
-    ctx.fillStyle = "#3f86d4"; ctx.fillRect(0, 92, W, H-92);
-    ctx.fillStyle = "#6fb3e8";
-    for (let y = 92; y < H; y += 6) {
-      for (let x = (Math.floor(frame*0.5) % 12) - 12; x < W; x += 12) ctx.fillRect(x, y, 6, 1);
-    }
+    // faint chart grid
+    ctx.strokeStyle = "rgba(230,240,235,0.12)"; ctx.lineWidth = 1;
+    for (let x = 12; x < W; x += 16) { ctx.beginPath(); ctx.moveTo(x+0.5, 0); ctx.lineTo(x+0.5, H); ctx.stroke(); }
+    for (let y = 12; y < H; y += 16) { ctx.beginPath(); ctx.moveTo(0, y+0.5); ctx.lineTo(W, y+0.5); ctx.stroke(); }
 
-    // a stream of different fish scrolling left -> right, hopping over the waves
-    const fishCols = [
-      ["#f0a030","#c07f20"], ["#5aa0d8","#3f7fb8"], ["#e05b5b","#b03a3a"],
-      ["#7fce6a","#5aa84a"], ["#c88ad8","#a05ab8"], ["#e8d24a","#c0a020"],
-      ["#e08a6a","#c05a4a"], ["#8fbfc0","#6f9fa0"]
-    ];
-    const N = 6, spacing = 34, speed = 0.6;
-    for (let i = 0; i < N; i++) {
-      const fx = ((frame*speed + i*spacing) % (W + 40)) - 20;
-      const hop = Math.abs(Math.sin((frame*0.06) + i*0.9)) * 12;
-      const fy = 90 - hop;
-      const col = fishCols[i % fishCols.length];
-      drawFishSprite(fx, fy, 1.6, col[0], col[1], 1);
-      // little splash when near the water
-      if (hop < 3) { ctx.fillStyle = "rgba(200,235,245,0.6)"; ctx.fillRect(fx-2, 91, 4, 1); }
-    }
+    // sun with warm glow (top)
+    ctx.fillStyle = "rgba(255,224,138,0.35)"; ctx.beginPath(); ctx.arc(W/2, 40, 24, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = "#ffe08a"; ctx.beginPath(); ctx.arc(W/2, 40, 15, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = "#fff3c0"; ctx.beginPath(); ctx.arc(W/2, 40, 9, 0, Math.PI*2); ctx.fill();
+
+    // stylized wave glyphs scattered on the chart
+    ctx.strokeStyle = "rgba(230,240,235,0.22)"; ctx.lineWidth = 1;
+    const waves = [[22,66],[120,60],[34,110],[130,112],[70,124],[100,80],[18,88]];
+    waves.forEach(([wx,wy], i) => {
+      if ((i + Math.floor(frame/40)) % 3 !== 0) {
+        ctx.beginPath();
+        ctx.moveTo(wx, wy);
+        ctx.quadraticCurveTo(wx+3, wy-3, wx+6, wy);
+        ctx.quadraticCurveTo(wx+9, wy+3, wx+12, wy);
+        ctx.stroke();
+      }
+    });
+
+    // compass rose (bottom-left)
+    (function(){
+      const cx=22, cy=118;
+      ctx.strokeStyle="rgba(244,236,208,0.8)"; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.arc(cx,cy,9,0,Math.PI*2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(cx,cy,5,0,Math.PI*2); ctx.stroke();
+      ctx.fillStyle="#e0402a"; ctx.beginPath();
+      ctx.moveTo(cx,cy-9); ctx.lineTo(cx+2,cy); ctx.lineTo(cx,cy+9); ctx.lineTo(cx-2,cy); ctx.closePath(); ctx.fill();
+      ctx.fillStyle="#f4ecd0"; ctx.beginPath();
+      ctx.moveTo(cx-9,cy); ctx.lineTo(cx,cy+2); ctx.lineTo(cx+9,cy); ctx.lineTo(cx,cy-2); ctx.closePath(); ctx.fill();
+      text("N", cx-2, cy-18, "#f4ecd0");
+    })();
+
+    // decorative sea serpent (bottom-right, like old charts)
+    (function(){
+      const x=104, y=126;
+      ctx.fillStyle="rgba(60,110,90,0.85)";
+      for (let i=0;i<4;i++){ const hx=x+i*7 + Math.sin(frame*0.05+i)*1; ctx.beginPath(); ctx.arc(hx,y,3,Math.PI,0); ctx.fill(); }
+      ctx.fillRect(x+26,y-4,5,4);
+      ctx.fillStyle="#e0402a"; ctx.fillRect(x+30,y-3,1,1);
+    })();
 
     // title text
     ctx.font = "bold 18px monospace"; ctx.textBaseline = "top"; ctx.textAlign = "center";
