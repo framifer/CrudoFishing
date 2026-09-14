@@ -1369,13 +1369,23 @@
     opts.forEach((o,i)=>{
       const yy = py+34 + i*20, sel = (i===langIndex);
       if (sel){ ctx.fillStyle="#3fae5a"; ctx.fillRect(px+10, yy-3, pw-20, 15); }
-      // little flag square
-      ctx.fillStyle = (o[1]==="it") ? "#3fae5a" : "#3a5aa0";
-      ctx.fillRect(px+16, yy-1, 8, 6);
-      ctx.fillStyle = (o[1]==="it") ? "#e04040" : "#e04040";
-      ctx.fillRect(px+21, yy-1, 3, 6);
-      ctx.fillStyle="#ffffff"; ctx.fillRect(px+16, yy-1, 3, 6);
-      text((sel?"\u25B6 ":"  ")+o[0], W/2+6, yy-1, sel?"#0f2a1a":"#3a2a1a");
+      // flag (12x8) at fx,fy
+      const fx = px+16, fy = yy-1, fw = 12, fh = 8;
+      if (o[1]==="it") {
+        // Italian tricolor: green / white / red (vertical thirds)
+        ctx.fillStyle="#2e8b57"; ctx.fillRect(fx, fy, 4, fh);
+        ctx.fillStyle="#f4f4f4"; ctx.fillRect(fx+4, fy, 4, fh);
+        ctx.fillStyle="#c0392b"; ctx.fillRect(fx+8, fy, 4, fh);
+      } else {
+        // USA flag: red/white stripes + blue canton with stars
+        for (let s=0;s<7;s++){ ctx.fillStyle=(s%2===0)?"#c0392b":"#f4f4f4"; ctx.fillRect(fx, fy + s*(fh/7), fw, fh/7); }
+        ctx.fillStyle="#3a4a9a"; ctx.fillRect(fx, fy, 5, 4);   // canton
+        ctx.fillStyle="#ffffff";
+        ctx.fillRect(fx+1, fy+1, 1, 1); ctx.fillRect(fx+3, fy+1, 1, 1); ctx.fillRect(fx+2, fy+2, 1, 1);
+      }
+      // frame around flag
+      ctx.strokeStyle="#5a3a1a"; ctx.lineWidth=1; ctx.strokeRect(fx-0.5, fy-0.5, fw+1, fh+1);
+      text((sel?"\u25B6 ":"  ")+o[0], W/2+10, yy-1, sel?"#0f2a1a":"#3a2a1a");
     });
     text("A/B = OK", W/2, H-16, "#8a2c2c");
     ctx.textAlign="left";
