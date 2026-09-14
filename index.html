@@ -88,7 +88,7 @@
   #ab {
     position: absolute;
     right: 5%; top: 6%;
-    width: 138px; height: 100px;
+    width: 170px; height: 140px;
     transform: rotate(-20deg);
   }
   .rbtn {
@@ -102,20 +102,21 @@
   }
   .rbtn:active, .rbtn.pressed { background:#7a2257; box-shadow: 0 1px 0 #5e1a44; transform: translateY(3px); }
   #btn-a { right: 0;  top: 4px; }
-  #btn-b { right: 62px; top: 40px; }
+  #btn-b { right: 90px; top: 62px; }
   .rlabel { position:absolute; color:#6b5b8a; font-size:10px; font-weight:bold; }
-  #lbl-a { right: 20px; top: 64px; }
-  #lbl-b { right: 82px; top: 100px; }
+  #lbl-a { right: 24px; top: 66px; }
+  #lbl-b { right: 114px; top: 124px; }
   /* START / SELECT */
   #startsel {
     position: absolute;
     left: 50%; top: 58%;
     transform: translateX(-50%);
     display: flex; gap: 80px;
+    z-index: 5;               /* keep Select/Start on top so their taps aren't stolen */
   }
-  .pill { width: 70px; height: 21px; border-radius: 11px; background:#2c2c3a; border:none; box-shadow:0 2px 0 #16161e; }
+  .pill { width: 70px; height: 21px; border-radius: 11px; background:#2c2c3a; border:none; box-shadow:0 2px 0 #16161e; touch-action: manipulation; }
   .pill:active { transform: translateY(1px); box-shadow:0 1px 0 #16161e; }
-  .plabel { position:absolute; color:#6b5b8a; font-size:8px; top:16px; letter-spacing:1px; }
+  .plabel { position:absolute; color:#6b5b8a; font-size:8px; top:16px; letter-spacing:1px; pointer-events:none; }
   #startsel div { position: relative; text-align:center; }
 </style>
 </head>
@@ -354,10 +355,10 @@
       if (ac && ac.state === "suspended") ac.resume();
       return ac;
     }
-    // play a single square-wave blip
-    function blip(freq, dur, type, vol) {
+    // play a single square-wave blip (optional `when` = seconds offset from now)
+    function blip(freq, dur, type, vol, when) {
       const a = ctxAudio(); if (!a) return;
-      const t0 = a.currentTime;
+      const t0 = a.currentTime + (when || 0);
       const osc = a.createOscillator();
       const g = a.createGain();
       osc.type = type || "square";
@@ -403,8 +404,8 @@
       coin:   () => seq([[988,0.06],[1319,0.12]], "square", 0.15),
       door:   () => seq([[523,0.07],[392,0.10]], "square", 0.16),
       splash: () => seq([[440,0.05],[294,0.05],[196,0.12]], "sawtooth", 0.14),
-      // single "click" of the fishing reel ratchet (used repeatedly while reeling in a fight)
-      reel:   () => blip(150 + Math.random()*40, 0.035, "sawtooth", 0.10),
+      // single very short "click" of the reel ratchet; fired rapidly for a spinning-drag feel
+      reel:   (when) => blip(240 + Math.random()*120, 0.012, "square", 0.07, when),
       vibrate:(pattern) => { try { if (navigator.vibrate) navigator.vibrate(pattern); } catch(e){} },
 
       // ----- background music (two tracks, low volume, looping) -----
@@ -2743,14 +2744,19 @@
 
     // 2) Tension: rises when reeling (B held), falls when you release B.
     const reeling = keys.b;
-    // Reel ratchet SFX: while B is held, emit a repeating "click" like a real reel.
-    // Clicks speed up as the fish tires (you gain line faster).
+    // Reel ratchet SFX: while B is held, fire a VERY fast stream of clicks,
+    // like a reel spinning against the drag. Clicks get even faster as the fish tires.
     if (reeling) {
+      // interval: ~0.013s (fresh) down to ~0.007s (exhausted) -> a fast drag-spin buzz
+      const clickEvery = 0.007 + f.stamina * 0.006;
       reelClickTimer -= dt;
-      if (reelClickTimer <= 0) {
-        SFX.reel();
-        // interval shrinks from ~0.14s (fresh fish) down to ~0.06s (exhausted)
-        reelClickTimer = 0.06 + f.stamina * 0.08;
+      // catch up: if the frame was long, emit several clicks so the rate stays high
+      let guard = 0, offset = 0;
+      while (reelClickTimer <= 0 && guard < 12) {
+        SFX.reel(offset);          // stagger extra clicks so they ratchet instead of stacking
+        reelClickTimer += clickEvery;
+        offset += clickEvery;
+        guard++;
       }
     } else {
       reelClickTimer = 0; // next press clicks immediately
