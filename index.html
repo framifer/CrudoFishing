@@ -207,7 +207,7 @@
       titleMaster:"Maestro Pescatore", titleLegend:"Leggenda del Mare",
       bronze:"Amo di Bronzo", silver:"Amo d'Argento", gold:"Amo d'Oro",
       // baits
-      baitVerme:"Verme", baitFondo:"Esca Profumata", baitViva:"Esca viva",
+      baitVerme:"Verme", baitFondo:"Esca Profumata", baitOttima:"Esca Ottima", baitViva:"Esca viva",
       // language screen
       choose_lang:"SCEGLI LA LINGUA", lang_it:"Italiano", lang_en:"English",
       zone_ready:"NUOVA ZONA DISPONIBILE!", zone_ready_sub:"Vai alla mappa (SELECT)",
@@ -246,7 +246,7 @@
       titleNovice:"Novice", titleFisher:"Angler", titleExpert:"Expert Angler",
       titleMaster:"Master Angler", titleLegend:"Legend of the Sea",
       bronze:"Bronze Hook", silver:"Silver Hook", gold:"Gold Hook",
-      baitVerme:"Worm", baitFondo:"Scented Bait", baitViva:"Live Bait",
+      baitVerme:"Worm", baitFondo:"Scented Bait", baitOttima:"Prime Bait", baitViva:"Live Bait",
       choose_lang:"CHOOSE LANGUAGE", lang_it:"Italiano", lang_en:"English",
       zone_ready:"NEW ZONE AVAILABLE!", zone_ready_sub:"Go to the map (SELECT)",
       back_town:"A = BACK TO TOWN"
@@ -262,7 +262,7 @@
     };
     return m[s] ? t(m[s]) : s;
   }
-  function baitName(key){ return t({verme:"baitVerme", fondo:"baitFondo", viva:"baitViva"}[key] || key); }
+  function baitName(key){ return t({verme:"baitVerme", fondo:"baitFondo", ottima:"baitOttima", viva:"baitViva"}[key] || key); }
   function catLabel(tier){ return t("cat"+tier); }
 
   // ---------- LOCATION & SEA NAME TRANSLATIONS ----------
@@ -1019,11 +1019,12 @@
   const BAITS = {
     verme:   { name:"Verme",        weights:[0.60,0.25,0.12,0.03], consumable:false, cost:0,  color:"#c88a6a" },
     fondo:   { name:"Esca Profumata",weights:[0.15,0.45,0.32,0.08], consumable:true,  cost:15, color:"#8a7a5a" },
+    ottima:  { name:"Esca Ottima",  weights:[0.08,0.25,0.55,0.12], consumable:true,  cost:35, color:"#5aa0a0" },
     viva:    { name:"Esca viva",    weights:[0.05,0.12,0.08,0.75], consumable:true,  cost:60, color:"#d0605a" }
   };
 
   // Bait inventory: quantities of consumable baits. Verme is unlimited (permanent).
-  const baitStock = { fondo: 5, viva: 3 };   // scorta iniziale di prova
+  const baitStock = { fondo: 5, ottima: 4, viva: 3 };   // scorta iniziale di prova
   let equippedBait = "verme";
 
   // Fishdex: set of caught species keys "location:name"
@@ -1380,7 +1381,7 @@
     coins = 0;
     aquarium.length = 0;
     Object.keys(baitStock).forEach(k => delete baitStock[k]);
-    baitStock.fondo = 5; baitStock.viva = 3;   // starter stock
+    baitStock.fondo = 5; baitStock.ottima = 4; baitStock.viva = 3;   // starter stock
     Object.keys(caught).forEach(k => delete caught[k]);
     equippedBait = "verme";
     currentLocation = "napoli";
@@ -1837,12 +1838,12 @@
   }
 
   // Shop catalog: consumable baits for sale
-  function shopList() { return ["fondo", "viva"]; }
+  function shopList() { return ["fondo", "ottima", "viva"]; }
   // Ordered list of location keys
   function locationList() { return LOCATION_ORDER.filter(k => LOCATIONS[k]); }
 
   // Ordered list of bait keys shown in the inventory
-  function baitList() { return ["verme", "fondo", "viva"]; }
+  function baitList() { return ["verme", "fondo", "ottima", "viva"]; }
 
   function updateMenu() {
     // Aquarium sub-view: B toggles the pointer; arrows browse only when active; A closes
