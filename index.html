@@ -744,19 +744,65 @@
   });
 
   // ---------- TEXT (tiny bitmap-ish via canvas font) ----------
+  // AUTO-FIT SAFETY NET (additive): if a string would spill past the screen
+  // edges given its x and current textAlign, it is squeezed horizontally just
+  // enough to fit. Text that already fits is drawn byte-for-byte as before.
+  const SCREEN_MARGIN = 2;   // keep a 2px gutter from each edge
   function text(str, x, y, color) {
     ctx.fillStyle = color || PAL.text;
     ctx.font = "8px monospace";
     ctx.textBaseline = "top";
-    ctx.fillText(str, x, y);
+    const s = "" + str;
+    const w = ctx.measureText(s).width;
+    const align = ctx.textAlign;
+    // compute the drawn left edge for the current alignment
+    let left = x;
+    if (align === "center") left = x - w / 2;
+    else if (align === "right" || align === "end") left = x - w;
+    const right = left + w;
+    // does it overflow either side of the screen?
+    if (left < SCREEN_MARGIN - 0.5 || right > W - SCREEN_MARGIN + 0.5) {
+      // available width depends on alignment so the anchor point stays put
+      let avail;
+      if (align === "center") avail = 2 * Math.min(x - SCREEN_MARGIN, (W - SCREEN_MARGIN) - x);
+      else if (align === "right" || align === "end") avail = x - SCREEN_MARGIN;
+      else avail = (W - SCREEN_MARGIN) - x;
+      avail = Math.max(1, avail);
+      const scale = Math.min(1, avail / w);
+      ctx.save();
+      ctx.translate(x, 0);
+      ctx.scale(scale, 1);
+      ctx.fillText(s, 0, y);   // x-anchor preserved by translate; align unchanged
+      ctx.restore();
+      return;
+    }
+    ctx.fillText(s, x, y);
   }
   function textBox(str, x, y) {
-    const w = str.length * 5 + 6;
+    // Clamp the box so it never runs past the right screen edge, and squeeze
+    // the text to match if needed. Additive: normal-length text is unaffected.
+    let w = str.length * 5 + 6;
+    const maxW = (W - SCREEN_MARGIN) - (x - 3);   // room from box left to screen edge
+    if (w > maxW) w = Math.max(6, maxW);
     ctx.fillStyle = PAL.textBg;
     ctx.fillRect(x-3, y-2, w, 11);
     ctx.strokeStyle = PAL.dark;
     ctx.strokeRect(x-3+0.5, y-2+0.5, w-1, 10);
-    text(str, x, y, PAL.text);
+    // draw text with auto-fit inside the (possibly clamped) box interior
+    const s = "" + str;
+    ctx.font = "8px monospace"; ctx.textBaseline = "top";
+    const tw2 = ctx.measureText(s).width;
+    const inner = w - 6;   // interior width from x to box right
+    if (tw2 > inner) {
+      ctx.save();
+      ctx.fillStyle = PAL.text;
+      ctx.translate(x, 0);
+      ctx.scale(Math.max(0.01, inner / tw2), 1);
+      ctx.fillText(s, 0, y);
+      ctx.restore();
+    } else {
+      text(s, x, y, PAL.text);
+    }
   }
 
   // ---------- GAME STATE ----------
@@ -3420,13 +3466,29 @@
   }
 
   function drawBanner(msg, color, by) {
-    const bw = msg.length * 6 + 16, bh = 16;
+    let bw = msg.length * 6 + 16;
+    const bh = 16;
+    // Clamp the banner so it never exceeds the screen width (with a small gutter).
+    const maxBw = W - SCREEN_MARGIN * 2;
+    if (bw > maxBw) bw = maxBw;
     const bx = (W - bw) / 2;
     if (by === undefined) by = 60;
     ctx.fillStyle = color; ctx.fillRect(bx, by, bw, bh);
     ctx.strokeStyle = PAL.textBg; ctx.lineWidth = 1; ctx.strokeRect(bx+0.5, by+0.5, bw-1, bh-1);
     ctx.font = "bold 10px monospace"; ctx.textBaseline = "top";
-    ctx.fillStyle = PAL.white; ctx.fillText(msg, bx + 8, by + 3);
+    ctx.fillStyle = PAL.white;
+    const inner = bw - 16;   // interior width (8px padding each side)
+    const mw = ctx.measureText(msg).width;
+    if (mw > inner) {
+      // squeeze the label horizontally to fit inside the clamped banner
+      ctx.save();
+      ctx.translate(bx + 8, 0);
+      ctx.scale(Math.max(0.01, inner / mw), 1);
+      ctx.fillText(msg, 0, by + 3);
+      ctx.restore();
+    } else {
+      ctx.fillText(msg, bx + 8, by + 3);
+    }
     ctx.font = "8px monospace";
   }
 
