@@ -805,6 +805,30 @@
     }
   }
 
+  // Draw a CENTERED string at (cx,y) squeezed to fit within maxW pixels.
+  // Additive helper used by narrow bars/boxes (e.g. the map info bar) where the
+  // container is narrower than the whole screen. Text that already fits maxW is
+  // drawn normally; longer text is scaled horizontally to fit exactly.
+  function textFitCenter(str, cx, y, color, maxW) {
+    const s = "" + str;
+    ctx.fillStyle = color || PAL.text;
+    ctx.font = "8px monospace";
+    ctx.textBaseline = "top";
+    const prevAlign = ctx.textAlign;
+    ctx.textAlign = "center";
+    const w = ctx.measureText(s).width;
+    if (w > maxW) {
+      ctx.save();
+      ctx.translate(cx, 0);
+      ctx.scale(Math.max(0.01, maxW / w), 1);
+      ctx.fillText(s, 0, y);
+      ctx.restore();
+    } else {
+      ctx.fillText(s, cx, y);
+    }
+    ctx.textAlign = prevAlign;
+  }
+
   // ---------- GAME STATE ----------
   const STATE = {
     AIM:"AIM", CASTING:"CASTING", FLYING:"FLYING", WAITING:"WAITING",
@@ -4850,20 +4874,22 @@
     ctx.fillStyle = "#f4ecd0"; ctx.fillRect(bx, barY, bw, barH);
     ctx.strokeStyle = "#5a3a1a"; ctx.lineWidth = 1; ctx.strokeRect(bx+0.5, barY+0.5, bw-1, barH-1);
     ctx.textAlign = "center";
+    // interior width of the beige bar (leave a small inner padding each side)
+    const barInner = bw - 8;
     if (mapMsg) {
-      text(locName(sel), W/2, barY + 2, "#3a2a1a");
-      text(mapMsg, W/2, barY + 11, "#8a2c2c");
+      textFitCenter(locName(sel), W/2, barY + 2, "#3a2a1a", barInner);
+      textFitCenter(mapMsg, W/2, barY + 11, "#8a2c2c", barInner);
     } else if (unlocked[selKey]) {
-      text(locName(sel) + "  \u2691", W/2, barY + 2, "#3a2a1a");
-      text(seaName(sel) + "   " + t("go"), W/2, barY + 11, "#6a5a3a");
+      textFitCenter(locName(sel) + "  \u2691", W/2, barY + 2, "#3a2a1a", barInner);
+      textFitCenter(seaName(sel) + "   " + t("go"), W/2, barY + 11, "#6a5a3a", barInner);
     } else if (mapPurchasable(selKey)) {
-      text(locName(sel) + "  \uD83D\uDD13", W/2, barY + 2, "#2e6a2c");
-      text(t("ticket") + " $" + ticketPriceFor(selKey) + "  " + t("unlock"), W/2, barY + 11, "#2e6a2c");
+      textFitCenter(locName(sel) + "  \uD83D\uDD13", W/2, barY + 2, "#2e6a2c", barInner);
+      textFitCenter(t("ticket") + " $" + ticketPriceFor(selKey) + "  " + t("unlock"), W/2, barY + 11, "#2e6a2c", barInner);
     } else {
       const i = LOCATION_ORDER.indexOf(selKey);
       const prev = i>0 ? LOCATION_ORDER[i-1] : null;
-      text(locName(sel) + "  (" + t("locked") + ")", W/2, barY + 2, "#8a2c2c");
-      if (prev) text((lang==="en"?"Finish ":"Completa ") + locName(LOCATIONS[prev]) + ": F1 3, F2 2, F3 2", W/2, barY + 11, "#8a2c2c");
+      textFitCenter(locName(sel) + "  (" + t("locked") + ")", W/2, barY + 2, "#8a2c2c", barInner);
+      if (prev) textFitCenter((lang==="en"?"Finish ":"Completa ") + locName(LOCATIONS[prev]) + ": F1 3, F2 2, F3 2", W/2, barY + 11, "#8a2c2c", barInner);
     }
     ctx.textAlign = "left";
   }
