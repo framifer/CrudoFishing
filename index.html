@@ -118,6 +118,88 @@
   .pill:active { transform: translateY(1px); box-shadow:0 1px 0 #16161e; }
   .plabel { position:absolute; color:#6b5b8a; font-size:8px; top:16px; letter-spacing:1px; pointer-events:none; }
   #startsel div { position: relative; text-align:center; }
+
+  /* ============================================================
+     ADDITIVE: LANDSCAPE FULLSCREEN MODE (mobile only)
+     Purely additive. Hidden by default; activated only by the
+     media query below (landscape + short viewport = phone).
+     No existing game logic is touched.
+     ============================================================ */
+  #lscape-overlay { display: none; }
+
+  @media (orientation: landscape) and (max-height: 600px) {
+    /* Hide the vertical Game Boy device entirely on landscape phones */
+    #device { display: none !important; }
+
+    /* Fullscreen black stage holding the scaled game copy + controls */
+    #lscape-overlay {
+      display: block;
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+      z-index: 9999;
+      overflow: hidden;
+      touch-action: none;
+    }
+    /* Scaled copy of the game canvas, centered by JS (left/top set inline) */
+    #lscape-canvas {
+      position: absolute;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      background: #0f380f;
+    }
+
+    /* ---- shared control look: transparent, only borders visible ---- */
+    #lscape-overlay .lgroup { position: absolute; }
+    #lscape-overlay .lbtn {
+      position: absolute;
+      background: rgba(255,255,255,0.04);
+      display: flex; align-items: center; justify-content: center;
+      font-family: monospace;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: none;
+      user-select: none;
+    }
+
+    /* D-PAD + SELECT (left) — soft white */
+    #lscape-dpad { left: 14px; bottom: 52px; width: 150px; height: 186px; }
+    #lscape-dpad .lbtn {
+      width: 50px; height: 50px; border-radius: 10px;
+      border: 2px solid rgba(255,255,255,0.45);
+      color: rgba(255,255,255,0.6); font-size: 20px;
+    }
+    #l-up    { left: 50px; top: 36px; }
+    #l-down  { left: 50px; top: 136px; }
+    #l-left  { left: 0;    top: 86px; }
+    #l-right { left: 100px; top: 86px; }
+    #lscape-dpad .lpill {
+      left: 34px; top: 0;
+      width: 82px; height: 24px; border-radius: 12px;
+      border: 2px solid rgba(255,255,255,0.45);
+      color: rgba(255,255,255,0.6); font-size: 10px; letter-spacing: 1px;
+    }
+    #lscape-dpad .lbtn.pressed { background: rgba(255,255,255,0.30); border-color: rgba(255,255,255,0.9); }
+
+    /* A / B + START (right) — soft blue */
+    #lscape-ab { right: 70px; bottom: 52px; width: 150px; height: 156px; }
+    #lscape-ab .lbtn {
+      width: 66px; height: 66px; border-radius: 50%;
+      border: 2px solid rgba(120,190,255,0.55);
+      color: rgba(210,235,255,0.9); font-size: 26px; font-weight: bold;
+    }
+    #l-a { right: 0;  top: 36px; }
+    #l-b { right: 76px; top: 84px; }
+    #lscape-ab .lpill {
+      right: 34px; top: 0;
+      width: 82px; height: 24px; border-radius: 12px;
+      border: 2px solid rgba(120,190,255,0.55);
+      color: rgba(210,235,255,0.9); font-size: 10px; letter-spacing: 1px;
+      font-weight: normal;
+    }
+    #lscape-ab .lbtn.pressed { background: rgba(120,190,255,0.30); border-color: rgba(180,220,255,0.95); }
+  }
 </style>
 </head>
 <body>
@@ -147,6 +229,33 @@
       <div><button class="pill" data-key="select"></button><span class="plabel">SELECT</span></div>
       <div><button class="pill" data-key="start"></button><span class="plabel">START</span></div>
     </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     ADDITIVE: LANDSCAPE FULLSCREEN OVERLAY (mobile only)
+     Buttons carry the SAME data-key values as the vertical
+     Game Boy buttons, so the existing input hook
+     document.querySelectorAll("[data-key]") wires them up
+     automatically to setKey(). No new input logic.
+     ============================================================ -->
+<div id="lscape-overlay" aria-hidden="true">
+  <canvas id="lscape-canvas"></canvas>
+
+  <!-- LEFT: D-pad + SELECT (soft white) -->
+  <div id="lscape-dpad" class="lgroup">
+    <button class="lbtn lpill" data-key="select">SELECT</button>
+    <button class="lbtn" id="l-up"    data-key="up">▲</button>
+    <button class="lbtn" id="l-left"  data-key="left">◀</button>
+    <button class="lbtn" id="l-right" data-key="right">▶</button>
+    <button class="lbtn" id="l-down"  data-key="down">▼</button>
+  </div>
+
+  <!-- RIGHT: A/B + START (soft blue) -->
+  <div id="lscape-ab" class="lgroup">
+    <button class="lbtn lpill" data-key="start">START</button>
+    <button class="lbtn" id="l-a" data-key="a">A</button>
+    <button class="lbtn" id="l-b" data-key="b">B</button>
   </div>
 </div>
 
@@ -6110,6 +6219,107 @@
   if (hasSave()) loadGame();
 
   requestAnimationFrame(loop);
+})();
+</script>
+
+<!-- ============================================================
+     ADDITIVE: LANDSCAPE FULLSCREEN RENDERER (independent script)
+     Copies each frame from the game canvas (#game) to the overlay
+     canvas (#lscape-canvas), scaled to fill the screen while
+     keeping aspect ratio and crisp pixels. Runs ONLY while the
+     landscape overlay is visible. Does not touch the game engine.
+     ============================================================ -->
+<script>
+(function () {
+  "use strict";
+  var overlay = document.getElementById("lscape-overlay");
+  var src     = document.getElementById("game");           // internal game canvas
+  var dst     = document.getElementById("lscape-canvas");  // fullscreen copy
+  if (!overlay || !src || !dst) return;
+  var dctx = dst.getContext("2d");
+
+  var rafId = null;
+
+  function isActive() {
+    // Matches the CSS media query: landscape + short viewport (phone)
+    return window.matchMedia("(orientation: landscape) and (max-height: 600px)").matches;
+  }
+
+  function layout() {
+    if (!isActive()) return;
+    var vw = window.innerWidth;
+    var vh = window.innerHeight;
+
+    // Reserve a side band for the touch controls on each side so the
+    // centered game never sits visually under the buttons.
+    // The band must cover the ACTUAL footprint of each control group:
+    //   left  d-pad group: left(14) + width(150)          = 164px
+    //   right A/B group:   right(70) + width(150)          = 220px
+    // Use the widest group as the reserved band (>=150, capped so the
+    // game still has room on very wide phones), with a small breathing gap.
+    var GROUP_LEFT_FOOTPRINT  = 14 + 150;   // 164
+    var GROUP_RIGHT_FOOTPRINT = 70 + 150;   // 220
+    var GAP = 10;
+    var band = Math.max(150, GROUP_LEFT_FOOTPRINT, GROUP_RIGHT_FOOTPRINT) + GAP; // 230
+    // On very wide phones don't reserve more than ~35% per side.
+    band = Math.min(band, Math.round(vw * 0.35));
+    var availW = Math.max(1, vw - band * 2);
+    var availH = vh;
+
+    // Preserve the game's internal aspect ratio (from #game).
+    var gw = src.width  || 160;
+    var gh = src.height || 144;
+    var scale = Math.min(availW / gw, availH / gh);
+    var w = Math.round(gw * scale);
+    var h = Math.round(gh * scale);
+
+    // Backing store at native game resolution -> crisp integer copy.
+    dst.width  = gw;
+    dst.height = gh;
+    dst.style.width  = w + "px";
+    dst.style.height = h + "px";
+    dst.style.left = Math.round((vw - w) / 2) + "px";
+    dst.style.top  = Math.round((vh - h) / 2) + "px";
+
+    dctx.imageSmoothingEnabled = false;
+  }
+
+  function frame() {
+    if (!isActive()) { rafId = null; return; }
+    // Copy the game's current frame 1:1 (same internal resolution).
+    dctx.imageSmoothingEnabled = false;
+    try { dctx.drawImage(src, 0, 0); } catch (e) { /* frame not ready */ }
+    rafId = requestAnimationFrame(frame);
+  }
+
+  function start() {
+    if (rafId != null) return;
+    layout();
+    rafId = requestAnimationFrame(frame);
+  }
+  function stop() {
+    if (rafId != null) { cancelAnimationFrame(rafId); rafId = null; }
+  }
+
+  function sync() {
+    if (isActive()) { start(); }
+    else { stop(); }
+  }
+
+  window.addEventListener("resize", function () { layout(); sync(); });
+  window.addEventListener("orientationchange", function () {
+    // orientationchange can fire before metrics settle; re-layout shortly after
+    setTimeout(function () { layout(); sync(); }, 100);
+  });
+  if (window.matchMedia) {
+    var mq = window.matchMedia("(orientation: landscape) and (max-height: 600px)");
+    var onMq = function () { layout(); sync(); };
+    if (mq.addEventListener) mq.addEventListener("change", onMq);
+    else if (mq.addListener) mq.addListener(onMq);
+  }
+
+  // Initial state on load
+  sync();
 })();
 </script>
 </body>
