@@ -340,28 +340,28 @@
       tut_page:"PAG.",
       tut_goal_h:"LO SCOPO",
       tut_goal_1:"Sei un pescatore in viaggio per i mari del mondo.",
-      tut_goal_2:"Obiettivo: catturare TUTTI i pesci di OGNI mare e di OGNI localita'.",
-      tut_goal_3:"Completa una zona per sbloccare la successiva sulla mappa.",
+      tut_goal_2:"Cattura TUTTI i pesci di OGNI mare e localita'.",
+      tut_goal_3:"Completa una zona per sbloccare la prossima.",
       tut_dpad_h:"IL DIREZIONALE",
-      tut_dpad_1:"Frecce: muovi il pescatore in citta' e sposta la mira.",
-      tut_dpad_2:"Su/Giu': scegli lo slancio del lancio.",
+      tut_dpad_1:"Frecce: muovi in citta' e sposti la mira.",
+      tut_dpad_2:"Su/Giu': regoli lo slancio del lancio.",
       tut_dpad_3:"Nei menu: navighi le voci.",
       tut_a_h:"TASTO A",
-      tut_a_1:"A = LANCIA la lenza (tienilo per caricare la potenza).",
-      tut_a_2:"Nei menu: conferma o torna indietro.",
+      tut_a_1:"A = LANCIA (tienilo per caricare).",
+      tut_a_2:"Nei menu: conferma o indietro.",
       tut_b_h:"TASTO B",
-      tut_b_1:"B = RITIRA la lenza e da' lo STRATTONE quando il pesce abbocca.",
-      tut_b_2:"Durante la lotta: tieni B per recuperare, molla per non spezzare la lenza.",
+      tut_b_1:"B = RITIRA e da' lo STRATTONE quando abbocca.",
+      tut_b_2:"In lotta: tieni B per recuperare, molla per non spezzare.",
       tut_ss_h:"START e SELECT",
-      tut_ss_1:"START: pausa, musica ed uscita al menu.",
-      tut_ss_2:"SELECT: apre il menu (acquario, collezione, negozio, citta').",
+      tut_ss_1:"START: pausa, musica ed uscita.",
+      tut_ss_2:"SELECT: menu (acquario, collezione, negozio, citta').",
       tut_flow_h:"IL RITMO DI PESCA",
-      tut_flow_1:"1) Mira con le frecce. 2) Tieni A e molla per lanciare.",
-      tut_flow_2:"3) Attendi. Al segnale ABBOCCA! premi subito B.",
-      tut_flow_3:"4) Lotta col pesce dosando B fino a portarlo a riva.",
+      tut_flow_1:"1) Mira. 2) Tieni A e molla per lanciare.",
+      tut_flow_2:"3) Al segnale ABBOCCA! premi subito B.",
+      tut_flow_3:"4) Lotta dosando B fino a riva.",
       tut_tip_h:"CONSIGLI",
-      tut_tip_1:"Compra esche migliori al negozio per pesci piu' rari.",
-      tut_tip_2:"Controlla la collezione per vedere quali pesci ti mancano.",
+      tut_tip_1:"Compra esche migliori per pesci rari.",
+      tut_tip_2:"Guarda la collezione per i pesci mancanti.",
       tut_tip_3:"Buona pesca!"
     },
     en: {
@@ -408,29 +408,29 @@
       tut_skip:"SELECT = SKIP",
       tut_page:"PG.",
       tut_goal_h:"THE GOAL",
-      tut_goal_1:"You are an angler travelling the seas of the world.",
-      tut_goal_2:"Goal: catch ALL the fish of EVERY sea and EVERY location.",
-      tut_goal_3:"Complete a zone to unlock the next one on the map.",
+      tut_goal_1:"You are an angler travelling the world's seas.",
+      tut_goal_2:"Catch ALL the fish of EVERY sea and location.",
+      tut_goal_3:"Complete a zone to unlock the next.",
       tut_dpad_h:"THE D-PAD",
-      tut_dpad_1:"Arrows: move the angler in town and aim your cast.",
-      tut_dpad_2:"Up/Down: pick the angle of your cast.",
+      tut_dpad_1:"Arrows: move in town and aim your cast.",
+      tut_dpad_2:"Up/Down: set the cast angle.",
       tut_dpad_3:"In menus: navigate the entries.",
       tut_a_h:"A BUTTON",
-      tut_a_1:"A = CAST the line (hold it to charge power).",
+      tut_a_1:"A = CAST (hold it to charge).",
       tut_a_2:"In menus: confirm or go back.",
       tut_b_h:"B BUTTON",
-      tut_b_1:"B = REEL IN the line and STRIKE when a fish bites.",
-      tut_b_2:"While fighting: hold B to reel, ease off so the line won't snap.",
+      tut_b_1:"B = REEL IN and STRIKE when a fish bites.",
+      tut_b_2:"Fighting: hold B to reel, ease off so it won't snap.",
       tut_ss_h:"START and SELECT",
-      tut_ss_1:"START: pause, music and exit to menu.",
-      tut_ss_2:"SELECT: opens the menu (aquarium, collection, shop, town).",
+      tut_ss_1:"START: pause, music and exit.",
+      tut_ss_2:"SELECT: menu (aquarium, collection, shop, town).",
       tut_flow_h:"THE FISHING RHYTHM",
-      tut_flow_1:"1) Aim with the arrows. 2) Hold A and release to cast.",
-      tut_flow_2:"3) Wait. On the BITE! signal press B right away.",
-      tut_flow_3:"4) Fight the fish, easing B until you land it.",
+      tut_flow_1:"1) Aim. 2) Hold A and release to cast.",
+      tut_flow_2:"3) On the BITE! signal press B at once.",
+      tut_flow_3:"4) Fight, easing B until you land it.",
       tut_tip_h:"TIPS",
-      tut_tip_1:"Buy better bait at the shop for rarer fish.",
-      tut_tip_2:"Check the collection to see which fish you're missing.",
+      tut_tip_1:"Buy better bait for rarer fish.",
+      tut_tip_2:"Check the collection for missing fish.",
       tut_tip_3:"Happy fishing!"
     }
   };
@@ -1896,7 +1896,7 @@
   }
   function drawTutorial() {
     drawWoodPanel(0, 0, W, H);
-    const px = 8, py = 10, pw = W-16, ph = H-20;
+    const px = 8, py = 8, pw = W-16, ph = H-16;
     ctx.fillStyle = "#f4ecd0"; ctx.fillRect(px, py, pw, ph);
     ctx.strokeStyle = "#5a3a1a"; ctx.lineWidth = 2; ctx.strokeRect(px+1, py+1, pw-2, ph-2);
 
@@ -1904,41 +1904,60 @@
 
     // header: main title + page counter
     ctx.textAlign = "left";
-    text(t("tut_title"), px+6, py+5, "#8a2c2c");
+    text(t("tut_title"), px+6, py+4, "#8a2c2c");
     ctx.textAlign = "right";
-    text(t("tut_page")+" "+(tutorialPage+1)+"/"+TUTORIAL_PAGES.length, px+pw-6, py+5, "#8a6a3a");
+    text(t("tut_page")+" "+(tutorialPage+1)+"/"+TUTORIAL_PAGES.length, px+pw-6, py+4, "#8a6a3a");
 
     // icon
-    drawTutorialIcon(page.icon, px+16, py+30);
+    drawTutorialIcon(page.icon, px+15, py+26);
 
     // section heading next to the icon
     ctx.textAlign = "left";
-    text(t(page.h), px+32, py+26, "#0f2a1a");
+    text(t(page.h), px+30, py+22, "#0f2a1a");
 
-    // body: word-wrap each line into the panel
-    const maxChars = 24;
-    let y = py+46;
-    page.body.forEach(key => {
+    // --- BODY: reserve room for the two footer prompts and NEVER draw over them ---
+    const bodyTop = py + 38;                 // just under the heading/icon
+    const footerTop = py + ph - 20;          // prompts live below this line
+    const bodyBottom = footerTop - 2;        // hard limit for body text
+    const maxChars = 26;                     // fits the panel width at 8px monospace
+
+    // 1) wrap all paragraphs into lines (blank line separates paragraphs)
+    const lines = [];
+    page.body.forEach((key, idx) => {
+      if (idx > 0) lines.push("");           // paragraph gap
       const paragraph = t(key);
       let cur = "";
       paragraph.split(" ").forEach(word => {
-        if ((cur + (cur?" ":"") + word).length > maxChars) {
-          text(cur, px+8, y, "#3a2a1a"); y += 9; cur = word;
+        if ((cur + (cur ? " " : "") + word).length > maxChars) {
+          if (cur) lines.push(cur);
+          cur = word;
         } else {
           cur = cur ? cur + " " + word : word;
         }
       });
-      if (cur) { text(cur, px+8, y, "#3a2a1a"); y += 9; }
-      y += 2; // small gap between paragraphs
+      if (cur) lines.push(cur);
     });
 
-    // footer prompts
+    // 2) pick a line height that makes every line fit between bodyTop..bodyBottom
+    const avail = bodyBottom - bodyTop;
+    let lh = 9;                               // preferred line height
+    if (lines.length > 1) {
+      lh = Math.min(9, Math.max(6, Math.floor(avail / lines.length)));
+    }
+    // 3) draw the lines, clamped so nothing spills past the body area
+    let y = bodyTop;
+    for (let i = 0; i < lines.length && y <= bodyBottom; i++) {
+      if (lines[i]) text(lines[i], px+8, y, "#3a2a1a");
+      y += lh;
+    }
+
+    // footer prompts (always on top of a clean strip)
     const last = tutorialPage === TUTORIAL_PAGES.length - 1;
     ctx.textAlign = "center";
     if (Math.floor(frame/20)%2===0) {
-      text("\u25B6 " + (last ? t("tut_start") : t("tut_next")), W/2, py+ph-19, "#8a2c2c");
+      text("\u25B6 " + (last ? t("tut_start") : t("tut_next")), W/2, footerTop, "#8a2c2c");
     }
-    text(t("tut_skip"), W/2, py+ph-9, "#8a6a3a");
+    text(t("tut_skip"), W/2, footerTop+10, "#8a6a3a");
     ctx.textAlign = "left";
   }
 
@@ -6635,6 +6654,7 @@
         locations: () => LOCATION_ORDER.slice(),
         setLocation: (k) => { if (LOCATIONS[k]) { currentLocation = k; return true; } return false; },
         setScreen: (s) => { screen = s; },
+        setLang: (l) => { if (l === "it" || l === "en") { lang = l; return true; } return false; },
         drawOnce: () => draw(),
       };
     }
