@@ -5,7 +5,7 @@
  * CSS/JS), so the cache list is tiny. Bump CACHE_VERSION whenever you change any
  * cached file to force clients to pick up the new version.
  */
-const CACHE_VERSION = "gb-fishing-v2";
+const CACHE_VERSION = "gb-fishing-v3";
 const APP_SHELL = [
   "./",
   "./index.html",
