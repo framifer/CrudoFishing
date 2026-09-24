@@ -2,9 +2,16 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GB Fishing">
 <meta name="theme-color" content="#1e1e2e">
+<meta name="description" content="Un gioco di pesca retro in stile Game Boy: cattura tutti i pesci di ogni mare.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <title>Game Boy Fishing</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -155,20 +162,24 @@
     #lscape-overlay .lgroup { position: absolute; }
     #lscape-overlay .lbtn {
       position: absolute;
-      background: rgba(255,255,255,0.04);
+      background: rgba(0,0,0,0.18);
       display: flex; align-items: center; justify-content: center;
       font-family: monospace;
       -webkit-tap-highlight-color: transparent;
       touch-action: none;
       user-select: none;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.8);
     }
 
-    /* D-PAD + SELECT (left) — soft white */
-    #lscape-dpad { left: 14px; bottom: 52px; width: 150px; height: 186px; }
+    /* D-PAD + SELECT (left) — soft white.
+       NB: the left/right offsets and group width below are mirrored in the
+       landscape layout() JS (GROUP_LEFT_FOOTPRINT / GROUP_RIGHT_FOOTPRINT).
+       Keep them in sync if you resize the controls. */
+    #lscape-dpad { left: calc(14px + env(safe-area-inset-left, 0px)); bottom: 52px; width: 150px; height: 186px; }
     #lscape-dpad .lbtn {
       width: 50px; height: 50px; border-radius: 10px;
-      border: 2px solid rgba(255,255,255,0.45);
-      color: rgba(255,255,255,0.6); font-size: 20px;
+      border: 2px solid rgba(255,255,255,0.55);
+      color: rgba(255,255,255,0.85); font-size: 20px;
     }
     #l-up    { left: 50px; top: 36px; }
     #l-down  { left: 50px; top: 136px; }
@@ -177,28 +188,28 @@
     #lscape-dpad .lpill {
       left: 34px; top: 0;
       width: 82px; height: 24px; border-radius: 12px;
-      border: 2px solid rgba(255,255,255,0.45);
-      color: rgba(255,255,255,0.6); font-size: 10px; letter-spacing: 1px;
+      border: 2px solid rgba(255,255,255,0.55);
+      color: rgba(255,255,255,0.85); font-size: 10px; letter-spacing: 1px;
     }
-    #lscape-dpad .lbtn.pressed { background: rgba(255,255,255,0.30); border-color: rgba(255,255,255,0.9); }
+    #lscape-dpad .lbtn.pressed { background: rgba(255,255,255,0.35); border-color: rgba(255,255,255,1); }
 
     /* A / B + START (right) — soft blue */
-    #lscape-ab { right: 70px; bottom: 52px; width: 150px; height: 156px; }
+    #lscape-ab { right: calc(70px + env(safe-area-inset-right, 0px)); bottom: 52px; width: 150px; height: 156px; }
     #lscape-ab .lbtn {
       width: 66px; height: 66px; border-radius: 50%;
-      border: 2px solid rgba(120,190,255,0.55);
-      color: rgba(210,235,255,0.9); font-size: 26px; font-weight: bold;
+      border: 2px solid rgba(120,190,255,0.7);
+      color: rgba(210,235,255,1); font-size: 26px; font-weight: bold;
     }
     #l-a { right: 0;  top: 36px; }
     #l-b { right: 76px; top: 84px; }
     #lscape-ab .lpill {
       right: 34px; top: 0;
       width: 82px; height: 24px; border-radius: 12px;
-      border: 2px solid rgba(120,190,255,0.55);
-      color: rgba(210,235,255,0.9); font-size: 10px; letter-spacing: 1px;
+      border: 2px solid rgba(120,190,255,0.7);
+      color: rgba(210,235,255,1); font-size: 10px; letter-spacing: 1px;
       font-weight: normal;
     }
-    #lscape-ab .lbtn.pressed { background: rgba(120,190,255,0.30); border-color: rgba(180,220,255,0.95); }
+    #lscape-ab .lbtn.pressed { background: rgba(120,190,255,0.35); border-color: rgba(180,220,255,1); }
   }
 </style>
 </head>
@@ -320,7 +331,38 @@
       // language screen
       choose_lang:"SCEGLI LA LINGUA", lang_it:"Italiano", lang_en:"English",
       zone_ready:"NUOVA ZONA DISPONIBILE!", zone_ready_sub:"Vai alla mappa (SELECT)",
-      back_town:"A = TORNA IN CITTA'"
+      back_town:"A = TORNA IN CITTA'",
+      // tutorial (come si gioca)
+      tut_title:"COME SI GIOCA",
+      tut_next:"A = AVANTI",
+      tut_start:"A = INIZIA",
+      tut_skip:"SELECT = SALTA",
+      tut_page:"PAG.",
+      tut_goal_h:"LO SCOPO",
+      tut_goal_1:"Sei un pescatore in viaggio per i mari del mondo.",
+      tut_goal_2:"Obiettivo: catturare TUTTI i pesci di OGNI mare e di OGNI localita'.",
+      tut_goal_3:"Completa una zona per sbloccare la successiva sulla mappa.",
+      tut_dpad_h:"IL DIREZIONALE",
+      tut_dpad_1:"Frecce: muovi il pescatore in citta' e sposta la mira.",
+      tut_dpad_2:"Su/Giu': scegli lo slancio del lancio.",
+      tut_dpad_3:"Nei menu: navighi le voci.",
+      tut_a_h:"TASTO A",
+      tut_a_1:"A = LANCIA la lenza (tienilo per caricare la potenza).",
+      tut_a_2:"Nei menu: conferma o torna indietro.",
+      tut_b_h:"TASTO B",
+      tut_b_1:"B = RITIRA la lenza e da' lo STRATTONE quando il pesce abbocca.",
+      tut_b_2:"Durante la lotta: tieni B per recuperare, molla per non spezzare la lenza.",
+      tut_ss_h:"START e SELECT",
+      tut_ss_1:"START: pausa, musica ed uscita al menu.",
+      tut_ss_2:"SELECT: apre il menu (acquario, collezione, negozio, citta').",
+      tut_flow_h:"IL RITMO DI PESCA",
+      tut_flow_1:"1) Mira con le frecce. 2) Tieni A e molla per lanciare.",
+      tut_flow_2:"3) Attendi. Al segnale ABBOCCA! premi subito B.",
+      tut_flow_3:"4) Lotta col pesce dosando B fino a portarlo a riva.",
+      tut_tip_h:"CONSIGLI",
+      tut_tip_1:"Compra esche migliori al negozio per pesci piu' rari.",
+      tut_tip_2:"Controlla la collezione per vedere quali pesci ti mancano.",
+      tut_tip_3:"Buona pesca!"
     },
     en: {
       press_start:"PRESS START", continue:"CONTINUE", new_game:"NEW GAME",
@@ -358,7 +400,38 @@
       baitVerme:"Worm", baitFondo:"Scented Bait", baitOttima:"Prime Bait", baitViva:"Live Bait",
       choose_lang:"CHOOSE LANGUAGE", lang_it:"Italiano", lang_en:"English",
       zone_ready:"NEW ZONE AVAILABLE!", zone_ready_sub:"Go to the map (SELECT)",
-      back_town:"A = BACK TO TOWN"
+      back_town:"A = BACK TO TOWN",
+      // tutorial (how to play)
+      tut_title:"HOW TO PLAY",
+      tut_next:"A = NEXT",
+      tut_start:"A = START",
+      tut_skip:"SELECT = SKIP",
+      tut_page:"PG.",
+      tut_goal_h:"THE GOAL",
+      tut_goal_1:"You are an angler travelling the seas of the world.",
+      tut_goal_2:"Goal: catch ALL the fish of EVERY sea and EVERY location.",
+      tut_goal_3:"Complete a zone to unlock the next one on the map.",
+      tut_dpad_h:"THE D-PAD",
+      tut_dpad_1:"Arrows: move the angler in town and aim your cast.",
+      tut_dpad_2:"Up/Down: pick the angle of your cast.",
+      tut_dpad_3:"In menus: navigate the entries.",
+      tut_a_h:"A BUTTON",
+      tut_a_1:"A = CAST the line (hold it to charge power).",
+      tut_a_2:"In menus: confirm or go back.",
+      tut_b_h:"B BUTTON",
+      tut_b_1:"B = REEL IN the line and STRIKE when a fish bites.",
+      tut_b_2:"While fighting: hold B to reel, ease off so the line won't snap.",
+      tut_ss_h:"START and SELECT",
+      tut_ss_1:"START: pause, music and exit to menu.",
+      tut_ss_2:"SELECT: opens the menu (aquarium, collection, shop, town).",
+      tut_flow_h:"THE FISHING RHYTHM",
+      tut_flow_1:"1) Aim with the arrows. 2) Hold A and release to cast.",
+      tut_flow_2:"3) Wait. On the BITE! signal press B right away.",
+      tut_flow_3:"4) Fight the fish, easing B until you land it.",
+      tut_tip_h:"TIPS",
+      tut_tip_1:"Buy better bait at the shop for rarer fish.",
+      tut_tip_2:"Check the collection to see which fish you're missing.",
+      tut_tip_3:"Happy fishing!"
     }
   };
   function t(key){ return (T[lang] && T[lang][key] !== undefined) ? T[lang][key] : (T.it[key] || key); }
@@ -731,16 +804,119 @@
   window.addEventListener("keyup",   e => { const k = keyMap[e.code]; if (k){ setKey(k,false); e.preventDefault(); } });
 
   // Touch / mouse on buttons
-  document.querySelectorAll("[data-key]").forEach(btn => {
-    const k = btn.getAttribute("data-key");
-    const down = e => { e.preventDefault(); setKey(k, true); btn.classList.add("pressed"); };
-    const up   = e => { e.preventDefault(); setKey(k, false); btn.classList.remove("pressed"); };
-    btn.addEventListener("touchstart", down, {passive:false});
-    btn.addEventListener("touchend", up, {passive:false});
-    btn.addEventListener("touchcancel", up, {passive:false});
-    btn.addEventListener("mousedown", down);
-    btn.addEventListener("mouseup", up);
-    btn.addEventListener("mouseleave", up);
+  // ---------- ROBUST MULTI-TOUCH BUTTON INPUT ----------
+  // Works identically for the vertical Game Boy shell and the landscape overlay:
+  // both sets of buttons carry data-key attributes. Instead of per-button
+  // listeners (which lose their "up" event if a finger slides off a button or a
+  // touchend is dropped), we track every active finger globally and recompute
+  // which key each finger is over. This gives reliable simultaneous presses
+  // (e.g. a direction + A) and never leaves a key stuck down.
+  const keyButtons = Array.from(document.querySelectorAll("[data-key]"));
+
+  // Return the topmost enabled data-key button under a screen point, or null.
+  function keyButtonAt(clientX, clientY) {
+    // elementFromPoint respects z-index / visibility, so hidden landscape or
+    // portrait controls (display:none via media query) are naturally ignored.
+    if (typeof document.elementFromPoint !== "function") return null;
+    let el = document.elementFromPoint(clientX, clientY);
+    while (el && el !== document.body) {
+      if (el.hasAttribute && el.hasAttribute("data-key")) return el;
+      el = el.parentElement;
+    }
+    return null;
+  }
+
+  function setPressedVisual(btn, on) {
+    if (!btn) return;
+    if (on) btn.classList.add("pressed"); else btn.classList.remove("pressed");
+  }
+
+  // ----- Touch: track each finger id -> the key it currently holds -----
+  const touchKey = {};          // touch identifier -> data-key string
+  const touchBtn = {};          // touch identifier -> button element (for visuals)
+
+  function refreshTouches(touchList) {
+    // Build the set of keys that should be held this frame from live touches.
+    const nextKey = {};
+    const nextBtn = {};
+    for (let i = 0; i < touchList.length; i++) {
+      const tch = touchList[i];
+      const btn = keyButtonAt(tch.clientX, tch.clientY);
+      if (btn) {
+        const k = btn.getAttribute("data-key");
+        nextKey[tch.identifier] = k;
+        nextBtn[tch.identifier] = btn;
+      }
+    }
+    // Release keys whose finger moved away or lifted.
+    for (const id in touchKey) {
+      const oldK = touchKey[id];
+      if (nextKey[id] !== oldK) {
+        // this finger no longer holds oldK: release it if no other finger holds it
+        setPressedVisual(touchBtn[id], false);
+      }
+    }
+    // Recompute which keys are held by ANY finger.
+    const heldNow = {};
+    for (const id in nextKey) heldNow[nextKey[id]] = true;
+    const heldBefore = {};
+    for (const id in touchKey) heldBefore[touchKey[id]] = true;
+    // Apply changes
+    Object.keys({ ...heldNow, ...heldBefore }).forEach(k => {
+      if (heldNow[k] && !heldBefore[k]) setKey(k, true);
+      else if (!heldNow[k] && heldBefore[k]) setKey(k, false);
+    });
+    // Update visuals for currently held buttons
+    for (const id in nextBtn) setPressedVisual(nextBtn[id], true);
+    // Commit
+    for (const id in touchKey) { if (!(id in nextKey)) { delete touchKey[id]; delete touchBtn[id]; } }
+    for (const id in nextKey) { touchKey[id] = nextKey[id]; touchBtn[id] = nextBtn[id]; }
+  }
+
+  function onTouch(e) {
+    // Only intercept if at least one active touch is over one of our controls;
+    // otherwise let the event pass (nothing else is interactive, but this keeps
+    // the handler polite and future-proof).
+    let onControl = false;
+    for (let i = 0; i < e.touches.length; i++) {
+      if (keyButtonAt(e.touches[i].clientX, e.touches[i].clientY)) { onControl = true; break; }
+    }
+    // Also intercept when a finger was previously on a control (so its release
+    // is processed even if it lifted just off the button edge).
+    if (onControl || Object.keys(touchKey).length) e.preventDefault();
+    SFX.unlock();
+    refreshTouches(e.touches);
+  }
+  // Attach to both control containers so touches anywhere on them are tracked
+  // even as fingers slide between buttons.
+  ["touchstart","touchmove","touchend","touchcancel"].forEach(evt => {
+    document.addEventListener(evt, onTouch, { passive:false });
+  });
+
+  // ----- Mouse (desktop testing): single pointer -----
+  let mouseKey = null, mouseBtn = null;
+  function mouseDown(e) {
+    const btn = keyButtonAt(e.clientX, e.clientY);
+    if (!btn) return;
+    e.preventDefault();
+    SFX.unlock();
+    mouseKey = btn.getAttribute("data-key");
+    mouseBtn = btn;
+    setPressedVisual(mouseBtn, true);
+    setKey(mouseKey, true);
+  }
+  function mouseUp() {
+    if (mouseKey) { setKey(mouseKey, false); setPressedVisual(mouseBtn, false); }
+    mouseKey = null; mouseBtn = null;
+  }
+  document.addEventListener("mousedown", mouseDown);
+  document.addEventListener("mouseup", mouseUp);
+  // Safety net: if focus/visibility is lost, release everything so nothing sticks.
+  window.addEventListener("blur", () => {
+    ["up","down","left","right","a","b","start","select"].forEach(k => setKey(k, false));
+    keyButtons.forEach(b => setPressedVisual(b, false));
+    for (const id in touchKey) { delete touchKey[id]; delete touchBtn[id]; }
+    mouseKey = null; mouseBtn = null;
   });
 
   // ---------- TEXT (tiny bitmap-ish via canvas font) ----------
@@ -848,6 +1024,8 @@
   let titleConfirmNew = false; // confirm overwrite dialog
   let creatorRow = 0;          // selected option row in the character creator
   let creatorToMap = false;    // if true, finishing the creator goes to the map (new game)
+  let tutorialPage = 0;        // current page of the how-to-play tutorial
+  let tutorialToCreator = false; // if true, finishing the tutorial opens the creator
   let nameEditing = false;     // editing the name field
   let creatorZone = 0;         // 0 = attributes (top), 1 = stamp board (bottom)
   let stampIndex = 0;          // selected stamp on the board
@@ -1597,7 +1775,7 @@
     if (consumePress("a") || consumePress("b") || consumePress("start")) {
       lang = langIndex === 1 ? "en" : "it";
       SFX.start();
-      openCreator(true);   // proceed to the hut / character creation
+      openTutorial(true);   // show how-to-play, then go to character creation
     }
   }
   function drawLangSelect() {
@@ -1633,6 +1811,135 @@
     });
     text("A/B = OK", W/2, H-16, "#8a2c2c");
     ctx.textAlign="left";
+  }
+
+  // ---------- TUTORIAL (COME SI GIOCA / HOW TO PLAY) ----------
+  // Pages: each has a small icon drawer + a heading key + body line keys.
+  const TUTORIAL_PAGES = [
+    { icon:"goal",  h:"tut_goal_h",  body:["tut_goal_1","tut_goal_2","tut_goal_3"] },
+    { icon:"dpad",  h:"tut_dpad_h",  body:["tut_dpad_1","tut_dpad_2","tut_dpad_3"] },
+    { icon:"a",     h:"tut_a_h",     body:["tut_a_1","tut_a_2"] },
+    { icon:"b",     h:"tut_b_h",     body:["tut_b_1","tut_b_2"] },
+    { icon:"ss",    h:"tut_ss_h",    body:["tut_ss_1","tut_ss_2"] },
+    { icon:"flow",  h:"tut_flow_h",  body:["tut_flow_1","tut_flow_2","tut_flow_3"] },
+    { icon:"tip",   h:"tut_tip_h",   body:["tut_tip_1","tut_tip_2","tut_tip_3"] }
+  ];
+  function openTutorial(toCreator) {
+    tutorialPage = 0;
+    tutorialToCreator = !!toCreator;
+    screen = "tutorial";
+    blockAUntilRelease = true;
+  }
+  function finishTutorial() {
+    blockAUntilRelease = true;
+    if (tutorialToCreator) openCreator(true);
+    else { screen = "title"; titleIndex = 0; }
+  }
+  function updateTutorial() {
+    // SELECT skips the whole tutorial
+    if (consumePress("select")) { SFX.select(); finishTutorial(); return; }
+    // B / LEFT goes back a page (or nothing on first page)
+    if (consumePress("b") || consumePress("left")) {
+      if (tutorialPage > 0) { tutorialPage--; SFX.left(); }
+    }
+    // A / START / RIGHT advances (or finishes on the last page)
+    if (consumePress("a") || consumePress("start") || consumePress("right")) {
+      if (tutorialPage < TUTORIAL_PAGES.length - 1) { tutorialPage++; SFX.right(); }
+      else { SFX.start(); finishTutorial(); }
+    }
+  }
+  // Small pixel icons drawn on the tutorial panel to illustrate each control.
+  function drawTutorialIcon(kind, cx, cy) {
+    ctx.save();
+    if (kind === "goal") {
+      // little fish
+      ctx.fillStyle = "#3f86d4";
+      ctx.beginPath(); ctx.ellipse(cx, cy, 9, 5, 0, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(cx+8, cy); ctx.lineTo(cx+14, cy-5); ctx.lineTo(cx+14, cy+5); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = "#0f380f"; ctx.fillRect(cx-6, cy-2, 2, 2);
+    } else if (kind === "dpad") {
+      ctx.fillStyle = "#2c2c3a";
+      ctx.fillRect(cx-4, cy-10, 8, 20);
+      ctx.fillRect(cx-10, cy-4, 20, 8);
+      ctx.fillStyle = "#e8d0a0";
+      // arrows
+      ctx.fillRect(cx-1, cy-8, 2, 2); ctx.fillRect(cx-1, cy+6, 2, 2);
+      ctx.fillRect(cx-8, cy-1, 2, 2); ctx.fillRect(cx+6, cy-1, 2, 2);
+    } else if (kind === "a") {
+      ctx.fillStyle = "#9b2c6f"; ctx.beginPath(); ctx.arc(cx, cy, 10, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = "#ffd9ee"; ctx.font = "bold 12px monospace"; ctx.textAlign="center"; ctx.textBaseline="middle";
+      ctx.fillText("A", cx, cy+1);
+    } else if (kind === "b") {
+      ctx.fillStyle = "#9b2c6f"; ctx.beginPath(); ctx.arc(cx, cy, 10, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = "#ffd9ee"; ctx.font = "bold 12px monospace"; ctx.textAlign="center"; ctx.textBaseline="middle";
+      ctx.fillText("B", cx, cy+1);
+    } else if (kind === "ss") {
+      ctx.fillStyle = "#2c2c3a";
+      ctx.fillRect(cx-13, cy-3, 11, 6);
+      ctx.fillRect(cx+2, cy-3, 11, 6);
+    } else if (kind === "flow") {
+      // rod + line + hook
+      ctx.strokeStyle = "#e0d0a0"; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(cx-10, cy+8); ctx.lineTo(cx+6, cy-8); ctx.stroke();
+      ctx.strokeStyle = "#f5f5f5"; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(cx+6, cy-8); ctx.lineTo(cx+8, cy+8); ctx.stroke();
+      ctx.strokeStyle = "#cfcfcf";
+      ctx.beginPath(); ctx.arc(cx+8, cy+9, 2, 0, Math.PI*1.5); ctx.stroke();
+    } else if (kind === "tip") {
+      // lightbulb-ish medal
+      ctx.fillStyle = "#ffe14d"; ctx.beginPath(); ctx.arc(cx, cy-1, 8, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = "#b8860b"; ctx.fillRect(cx-3, cy+6, 6, 3);
+      ctx.fillStyle = "#0f380f"; ctx.font = "bold 10px monospace"; ctx.textAlign="center"; ctx.textBaseline="middle";
+      ctx.fillText("!", cx, cy-1);
+    }
+    ctx.restore();
+  }
+  function drawTutorial() {
+    drawWoodPanel(0, 0, W, H);
+    const px = 8, py = 10, pw = W-16, ph = H-20;
+    ctx.fillStyle = "#f4ecd0"; ctx.fillRect(px, py, pw, ph);
+    ctx.strokeStyle = "#5a3a1a"; ctx.lineWidth = 2; ctx.strokeRect(px+1, py+1, pw-2, ph-2);
+
+    const page = TUTORIAL_PAGES[tutorialPage];
+
+    // header: main title + page counter
+    ctx.textAlign = "left";
+    text(t("tut_title"), px+6, py+5, "#8a2c2c");
+    ctx.textAlign = "right";
+    text(t("tut_page")+" "+(tutorialPage+1)+"/"+TUTORIAL_PAGES.length, px+pw-6, py+5, "#8a6a3a");
+
+    // icon
+    drawTutorialIcon(page.icon, px+16, py+30);
+
+    // section heading next to the icon
+    ctx.textAlign = "left";
+    text(t(page.h), px+32, py+26, "#0f2a1a");
+
+    // body: word-wrap each line into the panel
+    const maxChars = 24;
+    let y = py+46;
+    page.body.forEach(key => {
+      const paragraph = t(key);
+      let cur = "";
+      paragraph.split(" ").forEach(word => {
+        if ((cur + (cur?" ":"") + word).length > maxChars) {
+          text(cur, px+8, y, "#3a2a1a"); y += 9; cur = word;
+        } else {
+          cur = cur ? cur + " " + word : word;
+        }
+      });
+      if (cur) { text(cur, px+8, y, "#3a2a1a"); y += 9; }
+      y += 2; // small gap between paragraphs
+    });
+
+    // footer prompts
+    const last = tutorialPage === TUTORIAL_PAGES.length - 1;
+    ctx.textAlign = "center";
+    if (Math.floor(frame/20)%2===0) {
+      text("\u25B6 " + (last ? t("tut_start") : t("tut_next")), W/2, py+ph-19, "#8a2c2c");
+    }
+    text(t("tut_skip"), W/2, py+ph-9, "#8a6a3a");
+    ctx.textAlign = "left";
   }
 
   // Show a narrative screen with the given lines; call `after` when dismissed.
@@ -2211,6 +2518,9 @@
 
     // ----- LANGUAGE SELECT -----
     if (screen === "lang") { updateLangSelect(); return; }
+
+    // ----- TUTORIAL (how to play) -----
+    if (screen === "tutorial") { updateTutorial(); return; }
 
     // ----- CHARACTER CREATOR -----
     if (screen === "creator") { updateCreator(); return; }
@@ -3202,6 +3512,7 @@
 
     if (screen === "title") { drawTitle(); return; }
     if (screen === "lang") { drawLangSelect(); return; }
+    if (screen === "tutorial") { drawTutorial(); return; }
     if (screen === "creator") { drawCreator(); return; }
     if (screen === "story") { drawStory(); return; }
     if (screen === "map")   { drawPostcards(); return; }
@@ -6306,6 +6617,29 @@
   // Load existing progress at startup, if any
   if (hasSave()) loadGame();
 
+  // ---------- OPTIONAL TEST/DEBUG HOOK ----------
+  // Exposes a read-only snapshot of internal state ONLY when a test explicitly
+  // opts in by setting window.__GBF_DEBUG = true BEFORE load. In normal use the
+  // flag is undefined, so nothing is exposed and behaviour is unchanged.
+  try {
+    if (typeof window !== "undefined" && window.__GBF_DEBUG) {
+      window.__gbf = {
+        get state() { return state; },
+        get screen() { return screen; },
+        get coins() { return coins; },
+        get fight() { return fight; },
+        get aquariumLen() { return aquarium.length; },
+        get caughtCount() { return Object.keys(caught).length; },
+        setKey: (k, v) => setKey(k, v),
+        // test-only helpers for rendering coverage
+        locations: () => LOCATION_ORDER.slice(),
+        setLocation: (k) => { if (LOCATIONS[k]) { currentLocation = k; return true; } return false; },
+        setScreen: (s) => { screen = s; },
+        drawOnce: () => draw(),
+      };
+    }
+  } catch (e) {}
+
   requestAnimationFrame(loop);
 })();
 </script>
@@ -6408,6 +6742,26 @@
 
   // Initial state on load
   sync();
+})();
+</script>
+
+<!-- ============================================================
+     PWA: register the service worker so the game works offline.
+     Registration is guarded so the game still runs fine when opened
+     directly from the file system (file://) where SW is unavailable.
+     ============================================================ -->
+<script>
+(function () {
+  "use strict";
+  if (!("serviceWorker" in navigator)) return;
+  // Service workers require http(s); skip silently on file:// so local
+  // double-click opening still works.
+  if (location.protocol !== "http:" && location.protocol !== "https:") return;
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("sw.js").catch(function (err) {
+      console.warn("Service worker registration failed:", err);
+    });
+  });
 })();
 </script>
 </body>
